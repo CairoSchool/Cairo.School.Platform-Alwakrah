@@ -1,0 +1,1 @@
+wep: gunicorn app:app
