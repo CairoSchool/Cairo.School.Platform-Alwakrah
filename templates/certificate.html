@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>استخراج الشهادات - روضة ومدرسة القاهرة الإبتدائية الإعدادية</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        .form-card {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 30px;
+            border-radius: 18px;
+            border: 1px solid var(--border-color);
+            max-width: 600px;
+            margin: 20px auto;
+            text-align: right;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            font-size: 1.05rem;
+        }
+        .input-field-wrapper {
+            position: relative;
+        }
+        .input-field-wrapper input, .input-field-wrapper select {
+            width: 100%;
+            padding: 14px 18px;
+            padding-left: 110px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: rgba(30, 41, 59, 0.9);
+            color: white;
+            font-family: 'Cairo', sans-serif;
+            font-size: 1rem;
+            box-sizing: border-box;
+            text-align: right;
+        }
+        .input-field-wrapper input:focus, .input-field-wrapper select:focus {
+            border-color: var(--accent-color);
+            outline: none;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+        }
+        .field-badge {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--accent-color);
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            pointer-events: none;
+            direction: ltr;
+        }
+        .submit-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+        .submit-btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+        .result-box {
+            margin-top: 25px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .error-box {
+            margin-top: 25px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            padding: 15px;
+            border-radius: 12px;
+            color: #fca5a5;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" data-aos="fade-up">
+        <h1 style="margin-bottom: 10px;">استخراج الشهادات المدرسية</h1>
+        <p style="color: var(--text-muted); margin-bottom: 20px;">قم بإدخال الـ ID واختيار الشهادة لعرضها وتحميلها فوراً</p>
+        
+        <div class="form-card">
+            <form action="/certificate" method="POST">
+                
+                <!-- الرقم التعريفي للطالب (11 رقم) -->
+                <div class="input-group">
+                    <label>الرقم التعريفي للطالب (ID)</label>
+                    <div class="input-field-wrapper">
+                        <input type="text" name="national_id" pattern="[0-9]{11}" maxlength="11" minlength="11" placeholder="أدخل 11 رقم بدقة" required title="يجب أن يكون الرقم مكون من 11 رقم בדיוק">
+                        <span class="field-badge">ID: 11 Digits</span>
+                    </div>
+                </div>
+                
+                <!-- قائمة الشهادات المطلوبة (مطابقة لأسماء المجلدات عندك) -->
+                <div class="input-group">
+                    <label>الشهادة المطلوبة</label>
+                    <div class="input-field-wrapper">
+                        <select name="cert_type" required>
+                            <option value="" disabled selected>-- اختر نوع الشهادة --</option>
+                            <option value="cert1">شهادة التقييم الاول</option>
+                            <option value="cert2">شهادة التقييم الثاني</option>
+                            <option value="cert3">شهادة التقييم الثالث</option>
+                            <option value="cert4">شهادة التقييم الرابع</option>
+                            <option value="mid">شهادة منتصف العام</option>
+                            <option value="final">شهادة آخر العام</option>
+                        </select>
+                        <span class="field-badge">🎯 الأقسام</span>
+                    </div>
+                </div>
+                
+                <!-- زر الاستخراج -->
+                <button type="submit" class="submit-btn">
+                    <span>📥</span> استخراج وعرض الشهادة
+                </button>
+            </form>
+
+            <!-- عرض النتيجة إذا وُجدت الشهادة -->
+            {% if pdf_filename %}
+            <div class="result-box">
+                <h3 style="color: #34d399; margin-bottom: 10px;">تم العثور على الشهادة بنجاح! 🎉</h3>
+                <p style="color: var(--text-main); margin-bottom: 15px;">يمكنك معاينة الشهادة أو تحميلها مباشرة:</p>
+                <a href="{{ url_for('serve_pdf', filename=pdf_filename) }}" target="_blank" class="btn" style="background: #10b981; text-decoration: none; margin-left: 10px;">عرض الشهادة (PDF)</a>
+            </div>
+            {% endif %}
+
+            <!-- عرض رسالة الخطأ إذا لم تكن موجودة -->
+            {% if error_message %}
+            <div class="error-box">
+                <p style="margin: 0; font-weight: 600;">{{ error_message }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <br>
+        <a href="/" class="btn" style="background: transparent; border: 1px solid var(--accent-color);">← العودة للرئيسية</a>
+    </div>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>AOS.init({ duration: 800, once: true });</script>
+</body>
+</html>

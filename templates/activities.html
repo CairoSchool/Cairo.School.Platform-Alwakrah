@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الأنشطة المدرسية - روضة ومدرسة القاهرة</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        .activities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        .activity-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            padding: 30px 20px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        .activity-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent-color);
+            background: rgba(59, 130, 246, 0.15);
+            box-shadow: 0 15px 30px -5px rgba(59, 130, 246, 0.3);
+        }
+        .activity-card span { font-size: 3rem; display: block; margin-bottom: 15px; }
+        .activity-card h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; color: var(--text-main); }
+        .activity-card p { color: var(--text-muted); font-size: 0.95rem; margin: 0; }
+
+        /* نافذة معرض الصور المنبثقة (Modal) */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(8px);
+            overflow-y: auto;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+        .modal-content {
+            background: #1e293b;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid var(--border-color);
+            width: 100%;
+            max-width: 800px;
+            border-radius: 20px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .close-btn {
+            color: var(--text-muted);
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .close-btn:hover { color: white; }
+        
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .gallery-item {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            height: 150px;
+            background: #0f172a;
+        }
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+        .gallery-item img:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" data-aos="fade-up">
+        <div class="hero-section" style="margin-top: 10px; margin-bottom: 20px;">
+            <h1>الأنشطة المدرسية المتطورة</h1>
+            <p>اضغط على أي نشاط لاستعراض الصور والفعاليات الخاصة به بشكل تفاعلي</p>
+        </div>
+
+        <div class="activities-grid">
+            <!-- نشاط الحاسب الآلي -->
+            <div class="activity-card" onclick="openActivity('الحاسب الآلي', 'computer')">
+                <span>💻</span>
+                <h3>نشاط الحاسب الآلي</h3>
+                <p>ورش عمل البرمجة والابتكار الرقمي.</p>
+            </div>
+
+            <!-- النشاط الفني -->
+            <div class="activity-card" onclick="openActivity('النشاط الفني', 'art')">
+                <span>🎨</span>
+                <h3>النشاط الفني</h3>
+                <p>معارض الرسم والتشكيل والأشغال اليدوية.</p>
+            </div>
+
+            <!-- النشاط الرياضي -->
+            <div class="activity-card" onclick="openActivity('النشاط الرياضي', 'sport')">
+                <span>⚽</span>
+                <h3>النشاط الرياضي</h3>
+                <p>دوريات كرة القدم والبطولات المدرسية.</p>
+            </div>
+        </div>
+
+        <br>
+        <a href="/" class="btn" style="background: transparent; border: 1px solid var(--accent-color);">← العودة للرئيسية</a>
+    </div>
+
+    <!-- نافذة عرض الصور (Modal) -->
+    <div id="activityModal" class="modal">
+        <div class="modal-content" data-aos="zoom-in">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle" style="color: var(--accent-color); margin-bottom: 10px;">عنوان النشاط</h2>
+            <p id="modalDesc" style="color: var(--text-muted); margin-bottom: 20px;">معرض الصور والفعاليات المميزة</p>
+            
+            <div id="galleryContainer" class="gallery-grid">
+                <!-- الصور ستظهر هنا ديناميكياً -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({ duration: 800, once: true });
+
+        // محاكاة صور الأنشطة (يمكنك تغييرها أو ربطها بالصور الفعلية في ملفات الـ static)
+        const activityImages = {
+            'art': [
+                "{{ url_for('static', filename='images/art/1.jpg') }}",
+                "{{ url_for('static', filename='images/art/2.jpg') }}"
+            ],
+            'computer': [
+                "{{ url_for('static', filename='images/computer/1.jpg') }}",
+                "{{ url_for('static', filename='images/computer/2.jpg') }}"
+            ],
+            'sport': [
+                "{{ url_for('static', filename='images/sport/1.jpg') }}",
+                "{{ url_for('static', filename='images/sport/2.jpg') }}"
+            ]
+        };
+
+        function openActivity(title, type) {
+            document.getElementById('modalTitle').textContent = "معرض " + title;
+            const container = document.getElementById('galleryContainer');
+            container.innerHTML = "";
+
+            let images = activityImages[type] || [];
+            
+            if (images.length > 0) {
+                images.forEach(src => {
+                    let div = document.createElement('div');
+                    div.className = 'gallery-item';
+                    div.innerHTML = `<img src="${src}" alt="فعاليات النشاط" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x150?text=أضف+صورة+هنا';">`;
+                    container.appendChild(div);
+                });
+            } else {
+                container.innerHTML = "<p style='grid-column: 1/-1; color: var(--text-muted);'>قريباً سيتم إضافة الصور الخاصة بهذا النشاط.</p>";
+            }
+
+            document.getElementById('activityModal').style.display = "flex";
+        }
+
+        function closeModal() {
+            document.getElementById('activityModal').style.display = "none";
+        }
+
+        // إغلاق النافذة عند الضغط خارج الصندوق
+        window.onclick = function(event) {
+            let modal = document.getElementById('activityModal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>

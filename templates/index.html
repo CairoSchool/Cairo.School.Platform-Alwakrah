@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة روضة ومدرسة القاهرة الإبتدائية الإعدادية</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="container">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='logo.jpg') }}" alt="شعار المدرسة" class="school-logo">
+        </div>
+
+        <div class="hero-section">
+            <h1>منصة روضة ومدرسة القاهرة الإبتدائية الإعدادية</h1>
+            <p>حلول تقنية تعليمية متطورة لإدارة الجداول والشهادات والأنشطة بكل احترافية</p>
+        </div>
+
+        <!-- الأربع مربعات جنب بعض -->
+        <div class="services-grid">
+            <a href="/schedule_select" class="service-card">
+                <span>📅</span>
+                <h3>جدول الحصص</h3>
+            </a>
+
+            <a href="/certificate" class="service-card">
+                <span>🎓</span>
+                <h3>استخراج الشهادات</h3>
+            </a>
+
+            <a href="/activities" class="service-card">
+                <span>🎨</span>
+                <h3>الأنشطة المدرسية</h3>
+            </a>
+
+            <a href="/contact" class="service-card">
+                <span>📞</span>
+                <h3>اتصل بنا</h3>
+            </a>
+        </div>
+
+        <!-- جملة حقوق النشر المطلوبة تحت الأقسام -->
+        <div class="footer-copyright">
+            <p>جميع الحقوق محفوظة © روضة ومدرسة القاهرة الإبتدائية الإعدادية</p>
+        </div>
+    </div>
+
+</body>
+</html>
