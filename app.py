@@ -57,39 +57,44 @@ def find_subfolder_id_by_name(parent_folder_id, folder_name):
 def find_nested_file_in_drive(subfolder_name, file_name):
     try:
         service = get_drive_service()
-        print(f"DEBUG: Searching for subfolder: {subfolder_name}")
+        print(f"DEBUG: Searching for schedules folder structure...")
         
-        subfolder_id = None
-        
-        # 1. محاولة البحث عن المجلد مباشرة تحت المجلد الرئيسي ROOT_FOLDER_ID
-        folder_query = f"'{ROOT_FOLDER_ID}' in parents and name = '{subfolder_name}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
-        folder_results = service.files().list(q=folder_query, pageSize=1, fields="files(id)").execute()
-        folders = folder_results.get('files', [])
-        
-        if folders:
-            subfolder_id = folders[0]['id']
-        else:
-            # 2. إذا لم يتم إيجاده مباشرة، ابحث عنه داخل مجلد "certificates" الرئيسي
+        # 1. البحث عن مجلد "static" داخل المجلد الرئيسي ROOT_FOLDER_ID
+        static_folder_id = find_subfolder_id_by_name(ROOT_FOLDER_ID, 'static')
+        if not static_folder_id:
+            print("DEBUG: 'static' folder NOT found!")
+            return None
+            
+        # 2. البحث عن مجلد "schedules" داخل مجلد "static"
+        schedules_folder_id = find_subfolder_id_by_name(static_folder_id, 'schedules')
+        if not schedules_folder_id:
+            print("DEBUG: 'schedules' folder NOT found inside static!")
+            return None
+            
+        # 3. البحث عن القسم المطلوب (arabic أو languages) داخل مجلد "schedules"
+        section_folder_id = find_subfolder_id_by_name(schedules_folder_id, subfolder_name)
+        if not section_folder_id:
+            print(f"DEBUG: Section folder '{subfolder_name}' NOT found inside schedules!")
+            
+            # (اختياري للاحتياط للشهادات لو ما زالت تبحث في المسار القديم)
             cert_folder_query = f"'{ROOT_FOLDER_ID}' in parents and name = 'certificates' and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
             cert_results = service.files().list(q=cert_folder_query, pageSize=1, fields="files(id)").execute()
             cert_folders = cert_results.get('files', [])
-            
             if cert_folders:
                 cert_folder_id = cert_folders[0]['id']
                 sub_query = f"'{cert_folder_id}' in parents and name = '{subfolder_name}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
                 sub_results = service.files().list(q=sub_query, pageSize=1, fields="files(id)").execute()
                 sub_folders = sub_results.get('files', [])
                 if sub_folders:
-                    subfolder_id = sub_folders[0]['id']
-        
-        if not subfolder_id:
-            print(f"DEBUG: Subfolder '{subfolder_name}' NOT FOUND anywhere!")
-            return None
+                    section_folder_id = sub_folders[0]['id']
             
-        print(f"DEBUG: Subfolder found! ID: {subfolder_id}. Searching for file: {file_name}")
+            if not section_folder_id:
+                return None
+            
+        print(f"DEBUG: Section folder found! ID: {section_folder_id}. Searching for file: {file_name}")
         
-        # 3. البحث عن الملف داخل المجلد الفرعي المحدد بدقة
-        file_query = f"'{subfolder_id}' in parents and name = '{file_name}' and trashed = false"
+        # 4. البحث عن الملف داخل مجلد القسم المحدد بدقة
+        file_query = f"'{section_folder_id}' in parents and name = '{file_name}' and trashed = false"
         file_results = service.files().list(q=file_query, pageSize=1, fields="files(id, name)").execute()
         files = file_results.get('files', [])
         
@@ -97,7 +102,7 @@ def find_nested_file_in_drive(subfolder_name, file_name):
             print(f"DEBUG: File '{file_name}' FOUND successfully!")
             return files[0]['id']
             
-        print(f"DEBUG: File '{file_name}' NOT FOUND in subfolder '{subfolder_name}'!")
+        print(f"DEBUG: File '{file_name}' NOT FOUND in folder '{subfolder_name}'!")
         return None
     except Exception as e:
         print(f"Error in smart search: {e}")
