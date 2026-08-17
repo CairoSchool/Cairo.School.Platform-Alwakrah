@@ -1,7 +1,7 @@
 import os
 import io
 import json
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, redirect, url_for
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
@@ -117,7 +117,6 @@ def display_schedule():
         grade = request.form.get("grade")     # الفصل
         
         filename = f"{grade}.pdf"
-        # نبحث في الدرايف: المجلد الفرعي هو القسم، والملف هو اسم الفصل
         found_id = find_nested_file_in_drive(section, filename)
 
         if found_id:
@@ -127,24 +126,28 @@ def display_schedule():
 
     return render_template("display_schedule.html", pdf_file_id=file_id, error_message=error_message)
 
-# 5. صفحة الشهادات وسحب الملف من الدرايف
+# 5. صفحة الشهادات وسحب الملف من الدرايف (تم التعديل للتحويل وتثبيت النتيجة عبر GET)
 @app.route("/certificate", methods=["GET", "POST"])
 def certificate():
-    file_id = None
+    # استقبال الـ file_id لو جاي من الـ URL مباشرة (بعد الـ Redirect)
+    file_id = request.args.get("file_id")
     error_message = None
 
     if request.method == "POST":
         student_id = request.form.get("national_id")
         cert_type = request.form.get("cert_type")
         
-        filename = f"{student_id}.pdf"
-        # نبحث في الدرايف: المجلد الفرعي هو نوع الشهادة، والملف هو رقم الـ ID
-        found_id = find_nested_file_in_drive(cert_type, filename)
+        if student_id and cert_type:
+            filename = f"{student_id}.pdf"
+            found_id = find_nested_file_in_drive(cert_type, filename)
 
-        if found_id:
-            file_id = found_id
+            if found_id:
+                # الحل الجذري: تحويل الطلب إلى GET وتثبيت الـ ID في الرابط
+                return redirect(url_for('certificate', file_id=found_id))
+            else:
+                error_message = "رقم الـ ID مدخل خطأ أو الشهادة غير متاحة حتى الآن. يرجى مراجعة إدارة المدرسة."
         else:
-            error_message = "رقم الـ ID مدخل خطأ أو الشهادة غير متاحة حتى الآن. يرجى مراجعة إدارة المدرسة."
+            error_message = "يرجى إدخال رقم الـ ID واختيار نوع الشهادة بدقة."
 
     return render_template("certificate.html", pdf_file_id=file_id, error_message=error_message)
 
