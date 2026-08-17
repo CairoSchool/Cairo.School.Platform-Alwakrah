@@ -54,7 +54,7 @@
             padding: 30px;
             border: 1px solid var(--border-color);
             width: 100%;
-            max-width: 800px;
+            max-width: 900px;
             border-radius: 20px;
             text-align: center;
             position: relative;
@@ -74,16 +74,22 @@
         
         .gallery-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 15px;
             margin-top: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 5px;
         }
         .gallery-item {
             border-radius: 12px;
             overflow: hidden;
             border: 1px solid var(--border-color);
-            height: 150px;
+            height: 160px;
             background: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .gallery-item img {
             width: 100%;
@@ -101,29 +107,29 @@
     <div class="container" data-aos="fade-up">
         <div class="hero-section" style="margin-top: 10px; margin-bottom: 20px;">
             <h1>الأنشطة المدرسية المتطورة</h1>
-            <p>اضغط على أي نشاط لاستعراض الصور والفعاليات الخاصة به بشكل تفاعلي</p>
+            <p>اضغط على أي نشاط لاستعراض صور الفعاليات الخاصة به بشكل تفاعلي</p>
         </div>
 
         <div class="activities-grid">
-            <!-- نشاط الحاسب الآلي -->
-            <div class="activity-card" onclick="openActivity('الحاسب الآلي', 'computer')">
-                <span>💻</span>
-                <h3>نشاط الحاسب الآلي</h3>
-                <p>ورش عمل البرمجة والابتكار الرقمي.</p>
+            <!-- الأنشطة الثقافية -->
+            <div class="activity-card" onclick="openActivity('الأنشطة الثقافية', 'cultural')">
+                <span>📚</span>
+                <h3>الأنشطة الثقافية</h3>
+                <p>ندوات، مسابقات أدبية، ومكتبة المدرسة.</p>
             </div>
 
-            <!-- النشاط الفني -->
-            <div class="activity-card" onclick="openActivity('النشاط الفني', 'art')">
-                <span>🎨</span>
-                <h3>النشاط الفني</h3>
-                <p>معارض الرسم والتشكيل والأشغال اليدوية.</p>
+            <!-- الأنشطة الترفيهية -->
+            <div class="activity-card" onclick="openActivity('الأنشطة الترفيهية', 'entertainment')">
+                <span>🎉</span>
+                <h3>الأنشطة الترفيهية</h3>
+                <p>حفلات مدرسية ورحلات ترفيهية.</p>
             </div>
 
-            <!-- النشاط الرياضي -->
-            <div class="activity-card" onclick="openActivity('النشاط الرياضي', 'sport')">
-                <span>⚽</span>
-                <h3>النشاط الرياضي</h3>
-                <p>دوريات كرة القدم والبطولات المدرسية.</p>
+            <!-- الأنشطة العامة -->
+            <div class="activity-card" onclick="openActivity('الأنشطة العامة', 'general')">
+                <span>🌍</span>
+                <h3>الأنشطة العامة</h3>
+                <p>مبادرات مجتمعية وفعاليات متنوعة.</p>
             </div>
         </div>
 
@@ -139,7 +145,7 @@
             <p id="modalDesc" style="color: var(--text-muted); margin-bottom: 20px;">معرض الصور والفعاليات المميزة</p>
             
             <div id="galleryContainer" class="gallery-grid">
-                <!-- الصور ستظهر هنا ديناميكياً -->
+                <!-- الصور والفريمات ستنشأ هنا أوتوماتيكياً -->
             </div>
         </div>
     </div>
@@ -148,41 +154,33 @@
     <script>
         AOS.init({ duration: 800, once: true });
 
-        // محاكاة صور الأنشطة (يمكنك تغييرها أو ربطها بالصور الفعلية في ملفات الـ static)
-        const activityImages = {
-            'art': [
-                "{{ url_for('static', filename='images/art/1.jpg') }}",
-                "{{ url_for('static', filename='images/art/2.jpg') }}"
-            ],
-            'computer': [
-                "{{ url_for('static', filename='images/computer/1.jpg') }}",
-                "{{ url_for('static', filename='images/computer/2.jpg') }}"
-            ],
-            'sport': [
-                "{{ url_for('static', filename='images/sport/1.jpg') }}",
-                "{{ url_for('static', filename='images/sport/2.jpg') }}"
-            ]
-        };
-
-        function openActivity(title, type) {
+        // جلب الصور تلقائياً من الدرايف وإنشاء فريمات لها
+        async function openActivity(title, type) {
             document.getElementById('modalTitle').textContent = "معرض " + title;
             const container = document.getElementById('galleryContainer');
-            container.innerHTML = "";
-
-            let images = activityImages[type] || [];
+            container.innerHTML = "<p style='grid-column: 1/-1; color: var(--text-muted);'>جاري تحميل الصور...</p>";
             
-            if (images.length > 0) {
-                images.forEach(src => {
-                    let div = document.createElement('div');
-                    div.className = 'gallery-item';
-                    div.innerHTML = `<img src="${src}" alt="فعاليات النشاط" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x150?text=أضف+صورة+هنا';">`;
-                    container.appendChild(div);
-                });
-            } else {
-                container.innerHTML = "<p style='grid-column: 1/-1; color: var(--text-muted);'>قريباً سيتم إضافة الصور الخاصة بهذا النشاط.</p>";
-            }
-
             document.getElementById('activityModal').style.display = "flex";
+
+            try {
+                let response = await fetch(`/get_activity_images/${type}`);
+                let imageIds = await response.json();
+
+                container.innerHTML = "";
+
+                if (imageIds.length > 0) {
+                    imageIds.forEach(fileId => {
+                        let div = document.createElement('div');
+                        div.className = 'gallery-item';
+                        div.innerHTML = `<img src="/drive/file/${fileId}" alt="فعاليات النشاط" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x160?text=تعذر+عرض+الصورة';">`;
+                        container.appendChild(div);
+                    });
+                } else {
+                    container.innerHTML = "<p style='grid-column: 1/-1; color: var(--text-muted);'>لا توجد صور مضافة حتى الآن في هذا النشاط.</p>";
+                }
+            } catch (error) {
+                container.innerHTML = "<p style='grid-column: 1/-1; color: #fca5a5;'>حدث خطأ أثناء جلب الصور.</p>";
+            }
         }
 
         function closeModal() {
