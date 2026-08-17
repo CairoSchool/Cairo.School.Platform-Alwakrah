@@ -3,17 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جدول الحصص - روضة ومدرسة القاهرة الإبتدائية الإعدادية</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <title>جدول الحصص</title>
+    <style>
+        .form-card {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 30px;
+            border-radius: 18px;
+            border: 1px solid var(--border-color);
+            max-width: 600px;
+            margin: 20px auto;
+            text-align: right;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            font-size: 1.05rem;
+        }
+        .input-field-wrapper {
+            position: relative;
+        }
+        .input-field-wrapper select {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: rgba(30, 41, 59, 0.9);
+            color: white;
+            font-family: 'Cairo', sans-serif;
+            font-size: 1rem;
+            box-sizing: border-box;
+            text-align: right;
+        }
+        .input-field-wrapper select:focus {
+            border-color: var(--accent-color);
+            outline: none;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+        }
+        .submit-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+        .submit-btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+        .result-box {
+            margin-top: 25px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .error-box {
+            margin-top: 25px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            padding: 15px;
+            border-radius: 12px;
+            color: #fca5a5;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
+
     <div class="container" data-aos="fade-up">
-        <h1>جدول الحصص</h1>
-        <p>الجدول الدراسي يظهر هنا</p>
-        <br><a href="/" class="service-card" style="display:inline-block; padding:10px 20px;">العودة للرئيسية</a>
+        <h1 style="margin-bottom: 10px;">جدول الحصص المدرسي</h1>
+        <p style="color: var(--text-muted); margin-bottom: 20px;">اختر القسم أولاً، ثم اختر الفصل الدراسي لعرض الجدول فوراً</p>
+        
+        <div class="form-card">
+            <form action="/display_schedule" method="POST">
+                
+                <!-- اختيار القسم -->
+                <div class="input-group">
+                    <label>اختر القسم الدراسي</label>
+                    <div class="input-field-wrapper">
+                        <select name="section" id="sectionSelect" onchange="updateClasses()" required>
+                            <option value="" disabled {% if not request.form.get('section') %}selected{% endif %}>-- اختر القسم --</option>
+                            <option value="arabic" {% if request.form.get('section') == 'arabic' %}selected{% endif %}>قسم العربي</option>
+                            <option value="languages" {% if request.form.get('section') == 'languages' %}selected{% endif %}>قسم اللغات</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- اختيار الفصل -->
+                <div class="input-group">
+                    <label>اختر الفصل</label>
+                    <div class="input-field-wrapper">
+                        <select name="grade" id="classSelect" required>
+                            <option value="" disabled selected>-- اختر القسم أولاً --</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- زر البحث -->
+                <button type="submit" class="submit-btn">
+                    <span>📅</span> عرض جدول الحصص
+                </button>
+            </form>
+
+            <!-- عرض النتيجة وزر المعاينة المباشرة من الدرايف -->
+            {% if pdf_file_id %}
+            <div class="result-box">
+                <h3 style="color: #34d399; margin-bottom: 10px;">تم العثور على الجدول بنجاح! 🎉</h3>
+                <p style="color: var(--text-main); margin-bottom: 15px;">اضغط على الزر أدناه لمعاينة الجدول أو تحميله:</p>
+                
+                <a href="/drive/file/{{ pdf_file_id }}" target="_blank" 
+                   style="display: inline-block; background: #10b981; text-decoration: none; padding: 15px 30px; border-radius: 10px; color: white; font-weight: bold; font-size: 1.1rem; transition: 0.3s; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);">
+                   📄 عرض جدول الحصص الآن
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- رسالة الخطأ -->
+            {% if error_message %}
+            <div class="error-box">
+                <p style="margin: 0; font-weight: 600;">{{ error_message }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <br>
+        <a href="/" class="btn" style="background: transparent; border: 1px solid var(--accent-color);">← العودة للرئيسية</a>
     </div>
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-<script>AOS.init({ duration: 800, once: true });</script>
+
+    <script>
+        const arabicClasses = ["1/1", "2/1", "3/1", "4/1", "5/1", "6/1", "7/1", "8/1", "9/1"];
+        const langClasses = ["1/A", "2/A", "3/A", "4/A", "5/A", "6/A", "7/A", "8/A", "9/A"];
+        
+        // الحفاظ على الاختيار القديم لو الصفحة عملت POST
+        const oldSection = "{{ request.form.get('section', '') }}";
+        const oldGrade = "{{ request.form.get('grade', '') }}";
+
+        function updateClasses() {
+            const section = document.getElementById("sectionSelect").value;
+            const classSelect = document.getElementById("classSelect");
+            
+            classSelect.innerHTML = '<option value="" disabled selected>-- اختر الفصل --</option>';
+
+            let optionsList = [];
+            if (section === "arabic") {
+                optionsList = arabicClasses;
+            } else if (section === "languages") {
+                optionsList = langClasses;
+            }
+
+            optionsList.forEach(cls => {
+                let opt = document.createElement("option");
+                opt.value = cls;
+                opt.textContent = cls;
+                if (cls === oldGrade) {
+                    opt.selected = true;
+                }
+                classSelect.appendChild(opt);
+            });
+        }
+
+        // تشغيل الدالة تلقائياً لو كان في اختيار قديم محفوظ
+        if (oldSection) {
+            document.getElementById("sectionSelect").value = oldSection;
+            updateClasses();
+        }
+    </script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>AOS.init({ duration: 800, once: true });</script>
 </body>
 </html>
