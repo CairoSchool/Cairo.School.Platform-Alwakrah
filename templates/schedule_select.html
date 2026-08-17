@@ -19,7 +19,7 @@
                 <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-main);">اختر القسم الدراسي:</label>
                 <select id="sectionSelect" onchange="updateClasses()">
                     <option value="" disabled selected>-- اختر القسم --</option>
-                    <option value="arabic">القسم العربي</option>
+                    <option value="arabic">قسم العربي</option>
                     <option value="languages">قسم اللغات</option>
                 </select>
             </div>
@@ -74,13 +74,22 @@
         }
 
         function showSchedule() {
-            var section = document.getElementById("sectionSelect").options[document.getElementById("sectionSelect").selectedIndex].text;
+            var sectionSelect = document.getElementById("sectionSelect");
+            var sectionValue = sectionSelect.value; // عربي أو لغات (لتحقيق مسار الملف)
+            var sectionText = sectionSelect.options[sectionSelect.selectedIndex].text;
             var cls = document.getElementById("classSelect").value;
             
             if(cls) {
+                // استبدال الشرطة المائلة (/) بشرطة عادية (-) ليتطابق اسم الملف مع النظام
+                var safeClassName = cls.replace(/\//g, '-');
+                
+                // مسار ملف الـ PDF (مثال: static/arabic/4-1.pdf)
+                var pdfPath = `/static/${sectionValue}/${safeClassName}.pdf`;
+
                 document.getElementById("scheduleResult").innerHTML = `
-                    <h3 style='color: var(--accent-color); margin-bottom: 10px;'>جدول حصص (${section}) - فصل ${cls}</h3>
-                    <p style='color: var(--text-main);'>الجدول الدراسي الخاص بهذا الفصل سيظهر هنا بكل التفاصيل...</p>
+                    <h3 style='color: var(--accent-color); margin-bottom: 10px;'>جدول حصص (${sectionText}) - فصل ${cls}</h3>
+                    <p style='color: var(--text-main); margin-bottom: 15px;'>يمكنك عرض أو تحميل جدول الفصل مباشرة:</p>
+                    <a href="${pdfPath}" target="_blank" class="btn" style="background: var(--accent-color); color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 8px; display: inline-block;">عرض ملف الـ PDF 📄</a>
                 `;
             }
         }
