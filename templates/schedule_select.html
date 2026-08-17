@@ -42,9 +42,25 @@
     </div>
 
     <script>
-        // بيانات فصول القسم العربي وفصول اللغات
-        const arabicClasses = ["1/1", "2/1", "3/1", "4/1", "5/1", "6/1", "7/1", "8/1", "9/1"];
-        const langClasses = ["1/A", "2/A", "3/A", "4/A", "5/A", "6/A", "7/A", "8/A", "9/A"];
+        // توليد بيانات الفصول من الصف الأول وحتى التاسع (بدون أي مسافات نهائياً)
+        
+        // القسم العربي: (1-أول، 1-ثاني، 1-ثالث، 1-رابع ... إلى 9-رابع)
+        const arabicSuffixes = ["أول", "ثاني", "ثالث", "رابع"];
+        const arabicClasses = [];
+        for (let i = 1; i <= 9; i++) {
+            arabicSuffixes.forEach(suf => {
+                arabicClasses.push(`${i}-${suf}`);
+            });
+        }
+
+        // قسم اللغات: (1-A, 1-B, 1-C, 1-D ... إلى 9-D)
+        const langSuffixes = ["A", "B", "C", "D"];
+        const langClasses = [];
+        for (let i = 1; i <= 9; i++) {
+            langSuffixes.forEach(suf => {
+                langClasses.push(`${i}-${suf}`);
+            });
+        }
 
         function updateClasses() {
             const section = document.getElementById("sectionSelect").value;
@@ -75,16 +91,15 @@
 
         function showSchedule() {
             var sectionSelect = document.getElementById("sectionSelect");
-            var sectionValue = sectionSelect.value; // عربي أو لغات (لتحقيق مسار الملف)
+            var sectionValue = sectionSelect.value; // arabic أو languages لتحديد المجلد في الدرايف
             var sectionText = sectionSelect.options[sectionSelect.selectedIndex].text;
             var cls = document.getElementById("classSelect").value;
             
             if(cls) {
-                // استبدال الشرطة المائلة (/) بشرطة عادية (-) ليتطابق اسم الملف مع النظام بدون مشاكل مسارات
-                var safeClassName = cls.replace(/\//g, '-');
+                // اسم الملف مطابق تماماً بدون أي مسافات (مثال: 1-أول.pdf أو 1-A.pdf)
+                var safeClassName = cls;
                 
-                // مسار ملف الـ PDF (مثال: static/arabic/4-1.pdf أو static/languages/1-A.pdf)
-                var pdfPath = `/static/schedules/${sectionValue}/${safeClassName}.pdf`;
+                var pdfPath = `/drive/file_by_name/${sectionValue}/${safeClassName}.pdf`;
 
                 document.getElementById("scheduleResult").innerHTML = `
                     <h3 style='color: var(--accent-color); margin-bottom: 10px;'>جدول حصص (${sectionText}) - فصل ${cls}</h3>
