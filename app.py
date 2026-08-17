@@ -46,13 +46,22 @@ def find_nested_file_in_drive(subfolder_name, file_name):
     try:
         service = get_drive_service()
         
-        # البحث الذكي: سنبحث مباشرة عن الملف بالاسم المطلوب في الدرايف بالكامل لتجنب أخطاء تداخل المجلدات
-        query = f"name = '{file_name}' and trashed = false"
-        results = service.files().list(q=query, fields="files(id, name)").execute()
-        files = results.get('files', [])
+        # 1. البحث عن المجلد الفرعي داخل المجلد الرئيسي ROOT_FOLDER_ID
+        folder_query = f"'{ROOT_FOLDER_ID}' in parents and name = '{subfolder_name}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
+        folder_results = service.files().list(q=folder_query, pageSize=1, fields="files(id)").execute()
+        folders = folder_results.get('files', [])
+        
+        if not folders:
+            return None
+            
+        subfolder_id = folders[0]['id']
+        
+        # 2. البحث عن الملف داخل المجلد الفرعي المحدد بدقة
+        file_query = f"'{subfolder_id}' in parents and name = '{file_name}' and trashed = false"
+        file_results = service.files().list(q=file_query, pageSize=1, fields="files(id, name)").execute()
+        files = file_results.get('files', [])
         
         if files:
-            # إذا وجدنا الملف، نرجع معرف أول ملف مطابق
             return files[0]['id']
             
         return None
