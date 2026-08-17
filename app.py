@@ -45,23 +45,38 @@ def search_file_in_drive(folder_id, file_name):
 def find_nested_file_in_drive(subfolder_name, file_name):
     try:
         service = get_drive_service()
+        print(f"DEBUG: Searching for subfolder: {subfolder_name}")
         
-        # --- تشخيص: طباعة اسم المجلد الذي يبحث عنه ---
-        print(f"DEBUG: Searching for folder: {subfolder_name}")
+        subfolder_id = None
         
-        # 1. البحث عن المجلد الفرعي داخل المجلد الرئيسي ROOT_FOLDER_ID
+        # 1. محاولة البحث عن المجلد مباشرة تحت المجلد الرئيسي ROOT_FOLDER_ID
         folder_query = f"'{ROOT_FOLDER_ID}' in parents and name = '{subfolder_name}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
         folder_results = service.files().list(q=folder_query, pageSize=1, fields="files(id)").execute()
         folders = folder_results.get('files', [])
         
-        if not folders:
-            print(f"DEBUG: Folder '{subfolder_name}' NOT FOUND!")
+        if folders:
+            subfolder_id = folders[0]['id']
+        else:
+            # 2. إذا لم يتم إيجاده مباشرة، ابحث عنه داخل مجلد "certificates" الرئيسي
+            cert_folder_query = f"'{ROOT_FOLDER_ID}' in parents and name = 'certificates' and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
+            cert_results = service.files().list(q=cert_folder_query, pageSize=1, fields="files(id)").execute()
+            cert_folders = cert_results.get('files', [])
+            
+            if cert_folders:
+                cert_folder_id = cert_folders[0]['id']
+                sub_query = f"'{cert_folder_id}' in parents and name = '{subfolder_name}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
+                sub_results = service.files().list(q=sub_query, pageSize=1, fields="files(id)").execute()
+                sub_folders = sub_results.get('files', [])
+                if sub_folders:
+                    subfolder_id = sub_folders[0]['id']
+        
+        if not subfolder_id:
+            print(f"DEBUG: Subfolder '{subfolder_name}' NOT FOUND anywhere!")
             return None
             
-        subfolder_id = folders[0]['id']
-        print(f"DEBUG: Folder found! ID: {subfolder_id}. Searching for file: {file_name}")
+        print(f"DEBUG: Subfolder found! ID: {subfolder_id}. Searching for file: {file_name}")
         
-        # 2. البحث عن الملف داخل المجلد الفرعي المحدد بدقة
+        # 3. البحث عن الملف داخل المجلد الفرعي المحدد بدقة
         file_query = f"'{subfolder_id}' in parents and name = '{file_name}' and trashed = false"
         file_results = service.files().list(q=file_query, pageSize=1, fields="files(id, name)").execute()
         files = file_results.get('files', [])
@@ -70,7 +85,7 @@ def find_nested_file_in_drive(subfolder_name, file_name):
             print(f"DEBUG: File '{file_name}' FOUND successfully!")
             return files[0]['id']
             
-        print(f"DEBUG: File '{file_name}' NOT FOUND in folder '{subfolder_name}'!")
+        print(f"DEBUG: File '{file_name}' NOT FOUND in subfolder '{subfolder_name}'!")
         return None
     except Exception as e:
         print(f"Error in smart search: {e}")
