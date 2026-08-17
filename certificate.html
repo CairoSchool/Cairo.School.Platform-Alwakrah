@@ -115,23 +115,23 @@
                 <div class="input-group">
                     <label>الرقم التعريفي للطالب (ID)</label>
                     <div class="input-field-wrapper">
-                        <input type="text" name="national_id" pattern="[0-9]{11}" maxlength="11" minlength="11" placeholder="أدخل 11 رقم بدقة" required title="يجب أن يكون الرقم مكون من 11 رقم">
+                        <input type="text" name="national_id" value="{{ request.form.get('national_id', '') }}" pattern="[0-9]{11}" maxlength="11" minlength="11" placeholder="أدخل 11 رقم بدقة" required title="يجب أن يكون الرقم مكون من 11 رقم">
                         <span class="field-badge">ID: 11 Digits</span>
                     </div>
                 </div>
                 
-                <!-- قائمة الشهادات المطلوبة (مطابقة لأسماء المجلدات عندك) -->
+                <!-- قائمة الشهادات المطلوبة -->
                 <div class="input-group">
                     <label>الشهادة المطلوبة</label>
                     <div class="input-field-wrapper">
                         <select name="cert_type" required>
-                            <option value="" disabled selected>-- اختر نوع الشهادة --</option>
-                            <option value="cert1">شهادة التقييم الاول</option>
-                            <option value="cert2">شهادة التقييم الثاني</option>
-                            <option value="cert3">شهادة التقييم الثالث</option>
-                            <option value="cert4">شهادة التقييم الرابع</option>
-                            <option value="mid">شهادة منتصف العام</option>
-                            <option value="final">شهادة آخر العام</option>
+                            <option value="" disabled {% if not request.form.get('cert_type') %}selected{% endif %}>-- اختر نوع الشهادة --</option>
+                            <option value="cert1" {% if request.form.get('cert_type') == 'cert1' %}selected{% endif %}>شهادة التقييم الاول</option>
+                            <option value="cert2" {% if request.form.get('cert_type') == 'cert2' %}selected{% endif %}>شهادة التقييم الثاني</option>
+                            <option value="cert3" {% if request.form.get('cert_type') == 'cert3' %}selected{% endif %}>شهادة التقييم الثالث</option>
+                            <option value="cert4" {% if request.form.get('cert_type') == 'cert4' %}selected{% endif %}>شهادة التقييم الرابع</option>
+                            <option value="mid" {% if request.form.get('cert_type') == 'mid' %}selected{% endif %}>شهادة منتصف العام</option>
+                            <option value="final" {% if request.form.get('cert_type') == 'final' %}selected{% endif %}>شهادة آخر العام</option>
                         </select>
                         <span class="field-badge">🎯 الأقسام</span>
                     </div>
@@ -143,13 +143,12 @@
                 </button>
             </form>
 
-            <!-- عرض النتيجة إذا وُجدت الشهادة (تم تصحيح اسم المتغير إلى pdf_file_id) -->
+            <!-- عرض النتيجة ومعاينة الـ PDF إذا وُجدت الشهادة -->
             {% if pdf_file_id %}
             <div class="result-box">
                 <h3 style="color: #34d399; margin-bottom: 10px;">تم العثور على الشهادة بنجاح! 🎉</h3>
                 <p style="color: var(--text-main); margin-bottom: 15px;">يمكنك معاينة الشهادة أو تحميلها مباشرة:</p>
                 
-                <!-- عارض الـ PDF المباشر -->
                 <iframe src="/drive/file/{{ pdf_file_id }}" width="100%" height="500px" style="border-radius: 8px; border: none; margin-bottom: 15px;"></iframe>
                 
                 <br>
