@@ -80,16 +80,16 @@
             var cls = document.getElementById("classSelect").value;
             
             if(cls) {
-                // استبدال الشرطة المائلة (/) بشرطة عادية (-) ليتطابق اسم الملف مع النظام
+                // استبدال الشرطة المائلة (/) بشرطة عادية (-) ليتطابق اسم الملف مع النظام بدون مشاكل مسارات
                 var safeClassName = cls.replace(/\//g, '-');
                 
-                // مسار ملف الـ PDF (مثال: static/arabic/4-1.pdf)
+                // مسار ملف الـ PDF (مثال: static/arabic/4-1.pdf أو static/languages/1-A.pdf)
                 var pdfPath = `/static/${sectionValue}/${safeClassName}.pdf`;
 
                 document.getElementById("scheduleResult").innerHTML = `
                     <h3 style='color: var(--accent-color); margin-bottom: 10px;'>جدول حصص (${sectionText}) - فصل ${cls}</h3>
                     <p style='color: var(--text-main); margin-bottom: 15px;'>يمكنك عرض أو تحميل جدول الفصل مباشرة:</p>
-                    <a href="${pdfPath}" target="_blank" class="btn" style="background: var(--accent-color); color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 8px; display: inline-block;">عرض ملف الـ PDF 📄</a>
+                    <a href="${pdfPath}" target="_blank" class="btn" style="background: var(--accent-color); color: #fff; padding: 12px 25px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">عرض ملف الـ PDF 📄</a>
                 `;
             }
         }
