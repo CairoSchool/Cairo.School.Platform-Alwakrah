@@ -46,15 +46,20 @@ def find_nested_file_in_drive(subfolder_name, file_name):
     try:
         service = get_drive_service()
         
+        # --- تشخيص: طباعة اسم المجلد الذي يبحث عنه ---
+        print(f"DEBUG: Searching for folder: {subfolder_name}")
+        
         # 1. البحث عن المجلد الفرعي داخل المجلد الرئيسي ROOT_FOLDER_ID
         folder_query = f"'{ROOT_FOLDER_ID}' in parents and name = '{subfolder_name}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
         folder_results = service.files().list(q=folder_query, pageSize=1, fields="files(id)").execute()
         folders = folder_results.get('files', [])
         
         if not folders:
+            print(f"DEBUG: Folder '{subfolder_name}' NOT FOUND!")
             return None
             
         subfolder_id = folders[0]['id']
+        print(f"DEBUG: Folder found! ID: {subfolder_id}. Searching for file: {file_name}")
         
         # 2. البحث عن الملف داخل المجلد الفرعي المحدد بدقة
         file_query = f"'{subfolder_id}' in parents and name = '{file_name}' and trashed = false"
@@ -62,8 +67,10 @@ def find_nested_file_in_drive(subfolder_name, file_name):
         files = file_results.get('files', [])
         
         if files:
+            print(f"DEBUG: File '{file_name}' FOUND successfully!")
             return files[0]['id']
             
+        print(f"DEBUG: File '{file_name}' NOT FOUND in folder '{subfolder_name}'!")
         return None
     except Exception as e:
         print(f"Error in smart search: {e}")
