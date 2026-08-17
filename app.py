@@ -1,7 +1,7 @@
 import os
 import io
 import json
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, jsonify
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
@@ -40,6 +40,18 @@ def search_file_in_drive(folder_id, file_name):
             return files[0]['id']
     except Exception as e:
         print(f"Error searching file: {e}")
+    return None
+
+def find_subfolder_id_by_name(parent_folder_id, folder_name):
+    try:
+        service = get_drive_service()
+        query = f"'{parent_folder_id}' in parents and name = '{folder_name}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
+        results = service.files().list(q=query, pageSize=1, fields="files(id)").execute()
+        folders = results.get('files', [])
+        if folders:
+            return folders[0]['id']
+    except Exception as e:
+        print(f"Error finding subfolder: {e}")
     return None
 
 def find_nested_file_in_drive(subfolder_name, file_name):
@@ -101,6 +113,39 @@ def home():
 def activities():
     return render_template("activities.html")
 
+# مسار جديد لجلب صور الأنشطة أوتوماتيكياً من المسار: School Project -> static -> images -> [section_name]
+@app.route("/get_activity_images/<section_name>")
+def get_activity_images(section_name):
+    try:
+        # 1. البحث عن مجلد static داخل المجلد الرئيسي
+        static_folder_id = find_subfolder_id_by_name(ROOT_FOLDER_ID, 'static')
+        if not static_folder_id:
+            return jsonify([])
+
+        # 2. البحث عن مجلد images داخل مجلد static
+        images_folder_id = find_subfolder_id_by_name(static_folder_id, 'images')
+        if not images_folder_id:
+            return jsonify([])
+
+        # 3. البحث عن مجلد النشاط بالاسم (cultural, entertainment, general) داخل مجلد images
+        activity_folder_id = find_subfolder_id_by_name(images_folder_id, section_name)
+        if not activity_folder_id:
+            return jsonify([])
+
+        # 4. جلب كافة الصور (jpg, png) الموجودة داخل مجلد النشاط أوتوماتيكياً
+        service = get_drive_service()
+        query = f"'{activity_folder_id}' in parents and (mimeType = 'image/jpeg' or mimeType = 'image/png') and trashed = false"
+        results = service.files().list(q=query, pageSize=100, fields="files(id, name)").execute()
+        files = results.get('files', [])
+
+        # استخراج الـ IDs الخاصة بالصور لعرضها في الفريمات
+        image_ids = [file['id'] for file in files]
+        return jsonify(image_ids)
+
+    except Exception as e:
+        print(f"Error fetching activity images: {e}")
+        return jsonify([])
+
 # 3. صفحة اختيار جدول الحصص
 @app.route("/schedule_select")
 def schedule_select():
@@ -149,11 +194,15 @@ def certificate():
 
     return render_template("certificate.html", pdf_file_id=file_id, error_message=error_message)
 
-# 6. مسار لجلب وعرض ملف الـ PDF من جوجل درايف مباشرة للمستخدم
+# 6. مسار لجلب وعرض الملفات (صور أو ملفات PDF) من جوجل درايف مباشرة للمستخدم
 @app.route('/drive/file/<file_id>')
 def serve_drive_file(file_id):
     try:
         service = get_drive_service()
+        # استعلام عن نوع الملف لمعرفة هل هو صورة أم مستند
+        file_metadata = service.files().get(fileId=file_id, fields='mimeType').execute()
+        mime_type = file_metadata.get('mimeType', 'application/octet-stream')
+
         request_download = service.files().get_media(fileId=file_id)
         fh = io.BytesIO()
         downloader = MediaIoBaseDownload(fh, request_download)
@@ -161,7 +210,7 @@ def serve_drive_file(file_id):
         while not done:
             status, done = downloader.next_chunk()
         fh.seek(0)
-        return send_file(fh, mimetype='application/pdf')
+        return send_file(fh, mimetype=mime_type)
     except Exception as e:
         return f"Error loading file: {e}", 404
 
