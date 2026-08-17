@@ -1,7 +1,7 @@
 import os
 import io
 import json
-from flask import Flask, render_template, request, send_file, redirect, url_for
+from flask import Flask, render_template, request, send_file
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
@@ -126,11 +126,10 @@ def display_schedule():
 
     return render_template("display_schedule.html", pdf_file_id=file_id, error_message=error_message)
 
-# 5. صفحة الشهادات وسحب الملف من الدرايف (تم التعديل للتحويل وتثبيت النتيجة عبر GET)
+# 5. صفحة الشهادات وسحب الملف من الدرايف (النسخة المباشرة المستقرة)
 @app.route("/certificate", methods=["GET", "POST"])
 def certificate():
-    # استقبال الـ file_id لو جاي من الـ URL مباشرة (بعد الـ Redirect)
-    file_id = request.args.get("file_id")
+    file_id = None
     error_message = None
 
     if request.method == "POST":
@@ -142,8 +141,7 @@ def certificate():
             found_id = find_nested_file_in_drive(cert_type, filename)
 
             if found_id:
-                # الحل الجذري: تحويل الطلب إلى GET وتثبيت الـ ID في الرابط
-                return redirect(url_for('certificate', file_id=found_id))
+                file_id = found_id
             else:
                 error_message = "رقم الـ ID مدخل خطأ أو الشهادة غير متاحة حتى الآن. يرجى مراجعة إدارة المدرسة."
         else:
