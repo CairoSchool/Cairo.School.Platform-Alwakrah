@@ -84,7 +84,7 @@
                 var safeClassName = cls.replace(/\//g, '-');
                 
                 // مسار ملف الـ PDF (مثال: static/arabic/4-1.pdf أو static/languages/1-A.pdf)
-                var pdfPath = `/static/${sectionValue}/${safeClassName}.pdf`;
+                var pdfPath = `/static/schedules/${sectionValue}/${safeClassName}.pdf`;
 
                 document.getElementById("scheduleResult").innerHTML = `
                     <h3 style='color: var(--accent-color); margin-bottom: 10px;'>جدول حصص (${sectionText}) - فصل ${cls}</h3>
