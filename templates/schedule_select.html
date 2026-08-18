@@ -13,74 +13,95 @@
         <h1 style="margin-bottom: 10px;">جدول الحصص المدرسي</h1>
         <p style="color: var(--text-muted); margin-bottom: 30px;">اختر القسم أولاً، ثم اختر الفصل الدراسي لعرض الجدول</p>
         
-        <form action="/display_schedule" method="POST" style="margin-bottom: 25px;">
+        <!-- الفورم يرسل لنفس الصفحة أو مسار المعالجة الذي يعيد عرض نفس الصفحة -->
+        <form action="/schedule_select" method="POST" style="margin-bottom: 25px;">
             <!-- اختيار القسم (عربي أو لغات) -->
             <div style="margin-bottom: 15px;">
                 <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-main);">اختر القسم الدراسي:</label>
                 <select id="sectionSelect" name="section" onchange="updateClasses()" required>
                     <option value="" disabled selected>-- اختر القسم --</option>
-                    <option value="arabic">قسم العربي</option>
-                    <option value="languages">قسم اللغات</option>
+                    <option value="arabic" {% if selected_section == 'arabic' %}selected{% endif %}>قسم العربي</option>
+                    <option value="languages" {% if selected_section == 'languages' %}selected{% endif %}>قسم اللغات</option>
                 </select>
             </div>
 
             <!-- اختيار الفصل (يتغير حسب القسم المختار) -->
             <div style="margin-bottom: 20px;">
                 <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-main);">اختر الفصل:</label>
-                <select id="classSelect" name="grade" onchange="enableSubmit()" disabled required>
-                    <option value="" disabled selected>-- اختر القسم أولاً --</option>
+                <select id="classSelect" name="grade" onchange="enableSubmit()" required>
+                    <option value="" disabled selected>-- اختر الفصل --</option>
                 </select>
             </div>
 
-            <button type="submit" id="submitBtn" class="btn" style="background: var(--accent-color); color: #fff; width: 100%; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; opacity: 0.6;" disabled>استخراج وعرض الجدول 📄</button>
+            <button type="submit" id="submitBtn" class="btn" style="background: var(--accent-color); color: #fff; width: 100%; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s;">استخراج وعرض الجدول 📄</button>
         </form>
+
+        <!-- ظهور نتيجة البحث تحت الفورم مباشرة نفس ستايل الشهادات -->
+        {% if searched %}
+            {% if pdf_file_id %}
+                <div style="background: rgba(16, 185, 129, 0.1); border: 2px solid #10b981; padding: 25px; border-radius: 15px; margin-top: 20px; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.2); text-align: center;">
+                    <h3 style="color: #10b981; margin-bottom: 10px; font-size: 20px;">تم العثور على الجدول بنجاح! 🎉</h3>
+                    <p style="color: var(--text-main); margin-bottom: 15px; font-size: 15px;">اضغط على الزر أدناه لمعاينة الجدول في صفحة مستقلة:</p>
+                    <a href="{{ url_for('serve_drive_file', file_id=pdf_file_id) }}" target="_blank" class="btn" style="background: #10b981; color: #fff; padding: 12px 25px; text-decoration: none; border-radius: 10px; display: inline-block; font-weight: bold; font-size: 15px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);">
+                        عرض الجدول الآن 📄
+                    </a>
+                </div>
+            {% else %}
+                <div style="background: rgba(239, 68, 68, 0.1); border: 2px solid #ef4444; padding: 25px; border-radius: 15px; margin-top: 20px; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.2); text-align: center;">
+                    <h3 style="color: #ef4444; margin-bottom: 10px; font-size: 20px;">عذراً! ⚠️</h3>
+                    <p style="color: var(--text-main); margin: 0; font-size: 15px;">{{ error_message|default('لم يتم العثور على جدول لهذا الفصل') }}</p>
+                </div>
+            {% endif %}
+        {% endif %}
 
         <br>
         <a href="/" class="btn" style="background: transparent; border: 1px solid var(--accent-color);">← العودة للرئيسية</a>
     </div>
 
     <script>
-        // القسم العربي: (1-ا، 1-ب، 1-ج، 1-د ... إلى 9-د) بدون همزات
         const arabicSuffixes = ["ا", "ب", "ج", "د"];
         const arabicClasses = [];
         for (let i = 1; i <= 9; i++) {
-            arabicSuffixes.forEach(suf => {
-                arabicClasses.push(`${i}-${suf}`);
-            });
+            arabicSuffixes.forEach(suf => { arabicClasses.push(`${i}-${suf}`); });
         }
 
-        // قسم اللغات: (1-A, 1-B, 1-C, 1-D ... إلى 9-D)
         const langSuffixes = ["A", "B", "C", "D"];
         const langClasses = [];
         for (let i = 1; i <= 9; i++) {
-            langSuffixes.forEach(suf => {
-                langClasses.push(`${i}-${suf}`);
-            });
+            langSuffixes.forEach(suf => { langClasses.push(`${i}-${suf}`); });
         }
 
-        function updateClasses() {
+        // الحفاظ على الاختيار القديم لو الصفحة عملت إعادة تحميل
+        const savedSection = "{{ selected_section|default('') }}";
+        const savedGrade = "{{ selected_grade|default('') }}";
+
+        window.onload = function() {
+            if (savedSection) {
+                document.getElementById("sectionSelect").value = savedSection;
+                updateClasses(savedGrade);
+            }
+        };
+
+        function updateClasses(preselect = "") {
             const section = document.getElementById("sectionSelect").value;
             const classSelect = document.getElementById("classSelect");
             
             classSelect.disabled = false;
             classSelect.innerHTML = '<option value="" disabled selected>-- اختر الفصل --</option>';
 
-            let optionsList = [];
-            if (section === "arabic") {
-                optionsList = arabicClasses;
-            } else if (section === "languages") {
-                optionsList = langClasses;
-            }
+            let optionsList = (section === "arabic") ? arabicClasses : langClasses;
 
             optionsList.forEach(cls => {
                 let opt = document.createElement("option");
                 opt.value = cls;
                 opt.textContent = cls;
+                if (cls === preselect) {
+                    opt.selected = true;
+                }
                 classSelect.appendChild(opt);
             });
 
-            document.getElementById("submitBtn").disabled = true;
-            document.getElementById("submitBtn").style.opacity = "0.6";
+            enableSubmit();
         }
 
         function enableSubmit() {
