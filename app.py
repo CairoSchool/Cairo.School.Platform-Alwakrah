@@ -29,6 +29,9 @@ def get_drive_service():
 # الـ ID الخاص بفولدر "School Project" على جوجل درايف
 ROOT_FOLDER_ID = '1iUwb6zf2EgxyIOw6uls1jrMySN2Qmq_p'
 
+# --- نظام الذاكرة المؤقتة (Cache) لمنع بطء الموقع مع كثرة الملفات ---
+search_cache = {}
+
 def search_file_in_drive(folder_id, file_name):
     try:
         service = get_drive_service()
@@ -55,6 +58,11 @@ def find_subfolder_id_by_name(parent_folder_id, folder_name):
     return None
 
 def find_nested_file_in_drive(subfolder_name, file_name):
+    # التحقق من وجود الملف في الذاكرة المؤقتة (Cache) أولاً لضمان السرعة الفائقة
+    cache_key = f"{subfolder_name}/{file_name}"
+    if cache_key in search_cache:
+        return search_cache[cache_key]
+
     try:
         service = get_drive_service()
         print(f"DEBUG: Searching for schedules folder structure...")
@@ -100,7 +108,10 @@ def find_nested_file_in_drive(subfolder_name, file_name):
         
         if files:
             print(f"DEBUG: File '{file_name}' FOUND successfully!")
-            return files[0]['id']
+            file_id = files[0]['id']
+            # حفظ النتيجة في الذاكرة المؤقتة للأبد لتصبح سرعة فتحها فورية في المرات القادمة
+            search_cache[cache_key] = file_id
+            return file_id
             
         print(f"DEBUG: File '{file_name}' NOT FOUND in folder '{subfolder_name}'!")
         return None
@@ -118,9 +129,13 @@ def home():
 def activities():
     return render_template("activities.html")
 
-# مسار لجلب صور الأنشطة أوتوماتيكياً من المسار: School Project -> static -> images -> [section_name]
+# مسار لجلب صور الأنشطة أوتوماتيكياً من المسار: School Project -> static -> images -> [section_name] (مع التخزين المؤقت)
 @app.route("/get_activity_images/<section_name>")
 def get_activity_images(section_name):
+    cache_key = f"activity_images_{section_name}"
+    if cache_key in search_cache:
+        return jsonify(search_cache[cache_key])
+
     try:
         static_folder_id = find_subfolder_id_by_name(ROOT_FOLDER_ID, 'static')
         if not static_folder_id:
@@ -140,13 +155,15 @@ def get_activity_images(section_name):
         files = results.get('files', [])
 
         image_ids = [file['id'] for file in files]
+        # حفظ نتائج الصور في الذاكرة المؤقتة لتسريع عرض الأنشطة للأبد
+        search_cache[cache_key] = image_ids
         return jsonify(image_ids)
 
     except Exception as e:
         print(f"Error fetching activity images: {e}")
         return jsonify([])
 
-# 3 & 4. صفحة اختيار وعرض جدول الحصص في نفس الصفحة (بناءً على طلبك مثل الشهادات)
+# 3 & 4. صفحة اختيار وعرض جدول الحصص في نفس الصفحة
 @app.route("/schedule_select", methods=["GET", "POST"])
 def schedule_select():
     file_id = None
@@ -178,7 +195,7 @@ def schedule_select():
                            selected_section=selected_section,
                            selected_grade=selected_grade)
 
-# 5. صفحة الشهادات وسحب الملف من الدرايف (النسخة المباشرة المستقرة)
+# 5. صفحة الشهادات وسحب الملف من الدرايف
 @app.route("/certificate", methods=["GET", "POST"])
 def certificate():
     file_id = None
