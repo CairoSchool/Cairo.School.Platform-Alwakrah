@@ -3,96 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>جدول الحصص - روضة ومدرسة القاهرة الإبتدائية الإعدادية</title>
+    <title>عرض جدول الحصص</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 </head>
 <body>
+    <div class="container" style="text-align: center; max-width: 600px; margin: 50px auto; padding: 30px;">
+        <h1 style="margin-bottom: 25px; color: var(--text-main);">جدول الحصص المدرسي</h1>
 
-    <div class="container" data-aos="fade-up">
-        <h1 style="margin-bottom: 10px;">جدول الحصص المدرسي</h1>
-        <p style="color: var(--text-muted); margin-bottom: 30px;">اختر القسم أولاً، ثم اختر الفصل الدراسي لعرض الجدول</p>
-        
-        <form action="/display_schedule" method="POST" style="margin-bottom: 25px;">
-            <!-- اختيار القسم (عربي أو لغات) -->
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-main);">اختر القسم الدراسي:</label>
-                <select id="sectionSelect" name="section" onchange="updateClasses()" required>
-                    <option value="" disabled selected>-- اختر القسم --</option>
-                    <option value="arabic">قسم العربي</option>
-                    <option value="languages">قسم اللغات</option>
-                </select>
+        {% if pdf_file_id %}
+            <!-- مربع النجاح المضيء (نفس ستايل الشهادات تماماً) -->
+            <div style="background: rgba(16, 185, 129, 0.1); border: 2px solid #10b981; padding: 30px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.2);">
+                <h3 style="color: #10b981; margin-bottom: 10px; font-size: 22px;">تم العثور على الجدول بنجاح! 🎉</h3>
+                <p style="color: var(--text-main); margin-bottom: 20px; font-size: 16px;">اضغط على الزر أدناه لمعاينة الجدول في صفحة مستقلة:</p>
+                
+                <!-- زر العرض الأخضر المضيء الذي يفتح في تبويب جديد -->
+                <a href="{{ url_for('serve_drive_file', file_id=pdf_file_id) }}" target="_blank" class="btn" style="background: #10b981; color: #fff; padding: 14px 30px; text-decoration: none; border-radius: 10px; display: inline-block; font-weight: bold; font-size: 16px; transition: 0.3s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);">
+                    عرض الجدول الآن 📄
+                </a>
             </div>
-
-            <!-- اختيار الفصل (يتغير حسب القسم المختار) -->
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-main);">اختر الفصل:</label>
-                <select id="classSelect" name="grade" onchange="enableSubmit()" disabled required>
-                    <option value="" disabled selected>-- اختر القسم أولاً --</option>
-                </select>
+        {% else %}
+            <!-- مربع الخطأ لو الجدول مش موجود -->
+            <div style="background: rgba(239, 68, 68, 0.1); border: 2px solid #ef4444; padding: 30px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.2);">
+                <h3 style="color: #ef4444; margin-bottom: 10px; font-size: 22px;">عذراً! الجدول غير متاح حاليآ ⚠️</h3>
+                <p style="color: var(--text-main); margin: 0; font-size: 16px;">{{ error_message }}</p>
             </div>
+        {% endif %}
 
-            <button type="submit" id="submitBtn" class="btn" style="background: var(--accent-color); color: #fff; width: 100%; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; opacity: 0.6;" disabled>استخراج وعرض الجدول 📄</button>
-        </form>
-
+        <!-- زر العودة -->
         <br>
-        <a href="/" class="btn" style="background: transparent; border: 1px solid var(--accent-color);">← العودة للرئيسية</a>
+        <a href="/schedule_select" class="btn" style="background: transparent; border: 2px solid var(--accent-color); color: var(--text-main); padding: 10px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
+            ← العودة لاختيار فصل آخر
+        </a>
     </div>
-
-    <script>
-        // القسم العربي: (1-ا، 1-ب، 1-ج، 1-د ... إلى 9-د) بدون همزات
-        const arabicSuffixes = ["ا", "ب", "ج", "د"];
-        const arabicClasses = [];
-        for (let i = 1; i <= 9; i++) {
-            arabicSuffixes.forEach(suf => {
-                arabicClasses.push(`${i}-${suf}`);
-            });
-        }
-
-        // قسم اللغات: (1-A, 1-B, 1-C, 1-D ... إلى 9-D)
-        const langSuffixes = ["A", "B", "C", "D"];
-        const langClasses = [];
-        for (let i = 1; i <= 9; i++) {
-            langSuffixes.forEach(suf => {
-                langClasses.push(`${i}-${suf}`);
-            });
-        }
-
-        function updateClasses() {
-            const section = document.getElementById("sectionSelect").value;
-            const classSelect = document.getElementById("classSelect");
-            
-            classSelect.disabled = false;
-            classSelect.innerHTML = '<option value="" disabled selected>-- اختر الفصل --</option>';
-
-            let optionsList = [];
-            if (section === "arabic") {
-                optionsList = arabicClasses;
-            } else if (section === "languages") {
-                optionsList = langClasses;
-            }
-
-            optionsList.forEach(cls => {
-                let opt = document.createElement("option");
-                opt.value = cls;
-                opt.textContent = cls;
-                classSelect.appendChild(opt);
-            });
-
-            document.getElementById("submitBtn").disabled = true;
-            document.getElementById("submitBtn").style.opacity = "0.6";
-        }
-
-        function enableSubmit() {
-            const cls = document.getElementById("classSelect").value;
-            const submitBtn = document.getElementById("submitBtn");
-            if (cls) {
-                submitBtn.disabled = false;
-                submitBtn.style.opacity = "1";
-            }
-        }
-    </script>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script>AOS.init({ duration: 800, once: true });</script>
 </body>
 </html>
