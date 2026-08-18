@@ -13,11 +13,11 @@
         <h1 style="margin-bottom: 10px;">جدول الحصص المدرسي</h1>
         <p style="color: var(--text-muted); margin-bottom: 30px;">اختر القسم أولاً، ثم اختر الفصل الدراسي لعرض الجدول</p>
         
-        <form id="scheduleForm" style="margin-bottom: 25px;">
+        <form action="/display_schedule" method="POST" style="margin-bottom: 25px;">
             <!-- اختيار القسم (عربي أو لغات) -->
             <div style="margin-bottom: 15px;">
                 <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-main);">اختر القسم الدراسي:</label>
-                <select id="sectionSelect" onchange="updateClasses()">
+                <select id="sectionSelect" name="section" onchange="updateClasses()" required>
                     <option value="" disabled selected>-- اختر القسم --</option>
                     <option value="arabic">قسم العربي</option>
                     <option value="languages">قسم اللغات</option>
@@ -25,26 +25,22 @@
             </div>
 
             <!-- اختيار الفصل (يتغير حسب القسم المختار) -->
-            <div style="margin-bottom: 15px;">
+            <div style="margin-bottom: 20px;">
                 <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-main);">اختر الفصل:</label>
-                <select id="classSelect" onchange="showSchedule()" disabled>
+                <select id="classSelect" name="grade" onchange="enableSubmit()" disabled required>
                     <option value="" disabled selected>-- اختر القسم أولاً --</option>
                 </select>
             </div>
+
+            <button type="submit" id="submitBtn" class="btn" style="background: var(--accent-color); color: #fff; width: 100%; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; opacity: 0.6;" disabled>عرض الجدول 📄</button>
         </form>
 
-        <div id="scheduleResult" style="margin-top: 25px; text-align: center; background: rgba(15, 23, 42, 0.6); padding: 20px; border-radius: 15px; border: 1px solid var(--border-color);">
-            <p style="color: var(--text-muted); margin: 0;">الرجاء اختيار القسم والفصل لعرض الجدول...</p>
-        </div>
-
-        <br><br>
+        <br>
         <a href="/" class="btn" style="background: transparent; border: 1px solid var(--accent-color);">← العودة للرئيسية</a>
     </div>
 
     <script>
-        // توليد بيانات الفصول من الصف الأول وحتى التاسع (بدون أي مسافات نهائياً)
-        
-        // القسم العربي: (1-ا، 1-ب، 1-ج، 1-د ... إلى 9-د)
+        // القسم العربي: (1-ا، 1-ب، 1-ج، 1-د ... إلى 9-د) بدون همزات
         const arabicSuffixes = ["ا", "ب", "ج", "د"];
         const arabicClasses = [];
         for (let i = 1; i <= 9; i++) {
@@ -66,7 +62,6 @@
             const section = document.getElementById("sectionSelect").value;
             const classSelect = document.getElementById("classSelect");
             
-            // تفعيل قائمة الفصول
             classSelect.disabled = false;
             classSelect.innerHTML = '<option value="" disabled selected>-- اختر الفصل --</option>';
 
@@ -77,7 +72,6 @@
                 optionsList = langClasses;
             }
 
-            // إضافة الفصول المناسبة للقائمة
             optionsList.forEach(cls => {
                 let opt = document.createElement("option");
                 opt.value = cls;
@@ -85,27 +79,16 @@
                 classSelect.appendChild(opt);
             });
 
-            // إعادة تعيين النتيجة عند تغيير القسم
-            document.getElementById("scheduleResult").innerHTML = "<p style='color: var(--text-muted); margin: 0;'>الرجاء اختيار الفصل لعرض الجدول...</p>";
+            document.getElementById("submitBtn").disabled = true;
+            document.getElementById("submitBtn").style.opacity = "0.6";
         }
 
-        function showSchedule() {
-            var sectionSelect = document.getElementById("sectionSelect");
-            var sectionValue = sectionSelect.value; // arabic أو languages لتحديد المجلد في الدرايف
-            var sectionText = sectionSelect.options[sectionSelect.selectedIndex].text;
-            var cls = document.getElementById("classSelect").value;
-            
-            if(cls) {
-                // اسم الملف مطابق تماماً بدون أي مسافات (مثال: 1-أول.pdf أو 1-A.pdf)
-                var safeClassName = cls;
-                
-                var pdfPath = `/drive/file_by_name/${sectionValue}/${safeClassName}.pdf`;
-
-                document.getElementById("scheduleResult").innerHTML = `
-                    <h3 style='color: var(--accent-color); margin-bottom: 10px;'>جدول حصص (${sectionText}) - فصل ${cls}</h3>
-                    <p style='color: var(--text-main); margin-bottom: 15px;'>يمكنك عرض أو تحميل جدول الفصل مباشرة:</p>
-                    <a href="${pdfPath}" target="_blank" class="btn" style="background: var(--accent-color); color: #fff; padding: 12px 25px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">عرض ملف الـ PDF 📄</a>
-                `;
+        function enableSubmit() {
+            const cls = document.getElementById("classSelect").value;
+            const submitBtn = document.getElementById("submitBtn");
+            if (cls) {
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = "1";
             }
         }
     </script>
