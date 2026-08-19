@@ -10,7 +10,10 @@
 
     <div class="container" style="max-width: 700px; margin: auto; padding: 20px;">
         <div class="back-home" style="text-align: right; margin-bottom: 20px;">
-            <a href="/exams_timeline" class="btn-back">⬅ العودة لقسم الجداول</a>
+            <a href="/exams_timeline" class="btn-modern-back" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 20px; background: linear-gradient(135deg, #0077b6, #00b4d8); color: #fff; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 14px; box-shadow: 0 4px 15px rgba(0, 180, 216, 0.3); transition: 0.3s;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                العودة لقسم الجداول
+            </a>
         </div>
 
         <div class="hero-section" style="text-align: center;">
@@ -41,7 +44,10 @@
             </form>
 
             {% if error_message %}
-                <p class="error-msg" style="color: #ff6b6b; margin-top: 15px; text-align: center;">{{ error_message }}</p>
+                <div class="error-alert" style="background: rgba(255, 107, 107, 0.15); border: 1px solid #ff6b6b; color: #ff8787; padding: 15px; border-radius: 12px; margin-top: 20px; text-align: center; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.2);">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    <span>{{ error_message }}</span>
+                </div>
             {% endif %}
 
             {% if file_id %}

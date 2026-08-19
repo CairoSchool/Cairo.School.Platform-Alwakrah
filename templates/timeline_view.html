@@ -8,46 +8,51 @@
 </head>
 <body>
 
-    <div class="container">
-        <div class="back-home">
-            <a href="/exams_timeline" class="btn-back">⬅ العودة لقسم الجداول</a>
+    <div class="container" style="max-width: 700px; margin: auto; padding: 20px;">
+        <div class="back-home" style="text-align: right; margin-bottom: 20px;">
+            <a href="/exams_timeline" class="btn-modern-back" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 20px; background: linear-gradient(135deg, #0077b6, #00b4d8); color: #fff; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 14px; box-shadow: 0 4px 15px rgba(0, 180, 216, 0.3); transition: 0.3s;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                العودة لقسم الجداول
+            </a>
         </div>
 
-        <div class="hero-section">
-            <h1>الجدول الزمني العام للمدرسة</h1>
-            <p>اختر الفصل الدراسي للاطلاع على الجدول الزمني العام واستخراجه بكل سهولة</p>
+        <div class="hero-section" style="text-align: center;">
+            <h1>الجدول الزمني العام</h1>
+            <p>اختر الفصل الدراسي للاطلاع على الجدول الزمني العام للمدرسة</p>
         </div>
 
-        <div class="section-box" style="max-width: 600px; margin: auto;">
+        <div class="section-box" style="background: rgba(255, 255, 255, 0.05); padding: 30px; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.1);">
             <form method="POST" class="selection-form">
                 
-                <div class="form-group">
-                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-main);">اختر الفصل الدراسي:</label>
-                    <select name="timeline_term" id="timeline_term" required>
-                        <option value="" disabled selected>--اختر الفصل الدراسي--</option>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="timeline_term" style="display: block; margin-bottom: 8px; font-weight: bold;">اختر الفصل الدراسي:</label>
+                    <select name="timeline_term" id="timeline_term" required style="width: 100%; padding: 12px; border-radius: 8px; background: #1a1a2e; color: #fff; border: 1px solid #444;">
+                        <option value="">-- اختر الفصل الدراسي --</option>
                         <option value="term1" {% if selected_term == 'term1' %}selected{% endif %}>الفصل الدراسي الأول</option>
                         <option value="term2" {% if selected_term == 'term2' %}selected{% endif %}>الفصل الدراسي الثاني</option>
                     </select>
                 </div>
 
-                <button type="submit" class="btn-submit">عرض الجدول الزمني العام</button>
+                <button type="submit" class="btn-submit" style="width: 100%; padding: 12px; background: #007bff; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">عرض الجدول الزمني</button>
             </form>
 
             {% if error_message %}
-                <p class="error-msg" style="color: #ff6b6b; margin-top: 15px; text-align: center;">{{ error_message }}</p>
+                <div class="error-alert" style="background: rgba(255, 107, 107, 0.15); border: 1px solid #ff6b6b; color: #ff8787; padding: 15px; border-radius: 12px; margin-top: 20px; text-align: center; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.2);">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    <span>{{ error_message }}</span>
+                </div>
             {% endif %}
 
             {% if file_id %}
-                <div class="success-box" style="margin-top: 20px; text-align: center;">
-                    <a href="/drive/file/{{ file_id }}" target="_blank" class="btn-pdf-glowing">عرض وتنزيل الجدول الزمني العام (PDF)</a>
+                <div class="success-box" style="margin-top: 25px; text-align: center;">
+                    <a href="/drive/file/{{ file_id }}" target="_blank" class="btn-pdf-glowing" style="display: inline-block; padding: 12px 25px; background: #28a745; color: #fff; border-radius: 8px; text-decoration: none; font-weight: bold; box-shadow: 0 0 15px rgba(40, 167, 69, 0.5);">عرض وتنزيل الجدول الزمني (PDF)</a>
                 </div>
             {% endif %}
         </div>
 
-        <div class="footer-copyright" style="margin-top: 40px;">
+        <div class="footer-copyright" style="text-align: center; margin-top: 40px;">
             <p>جميع الحقوق محفوظة © روضة ومدرسة القاهرة الإبتدائية الإعدادية</p>
         </div>
     </div>
-
 </body>
 </html>
