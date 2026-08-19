@@ -8,6 +8,15 @@
 </head>
 <body>
 
+    <!-- الشريط المتحرك العلوي للتنبيهات والإعلانات -->
+    <div class="news-ticker-bar">
+        <div class="news-ticker-content">
+            <span>📢 أهلاً بكم في منصة روضة ومدرسة القاهرة الإبتدائية الإعدادية</span>
+            <span>⭐ تم تحديث جداول الاختبارات والتقييمات للفصل الدراسي الحالي</span>
+            <span>📌 يرجى متابعة استخراج الشهادات والتقويم المدرسي باستمرار</span>
+        </div>
+    </div>
+
     <div class="container">
         <div class="logo-container">
             <img src="{{ url_for('static', filename='logo.jpg') }}" alt="شعار المدرسة" class="school-logo">
@@ -26,7 +35,7 @@
                 <h3>جدول الحصص</h3>
             </a>
 
-            <!-- 2. الجدول الزمني وجداول الاختبارات (بدل الأنشطة) -->
+            <!-- 2. الجدول الزمني وجداول الاختبارات -->
             <a href="/exams_timeline" class="service-card">
                 <span>📋</span>
                 <h3>الجدول الزمني وجداول الاختبارات</h3>
