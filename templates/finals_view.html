@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جداول اختبارات نهاية الفصل</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="container">
+        <div class="back-home">
+            <a href="/exams_timeline" class="btn-back">⬅ العودة لقسم الجداول</a>
+        </div>
+
+        <div class="hero-section">
+            <h1>جداول اختبارات نهاية الفصل الدراسي</h1>
+            <p>اختر الفصل الدراسي للاطلاع على جدول الامتحانات النهائية</p>
+        </div>
+
+        <div class="section-box" style="max-width: 600px; margin: auto;">
+            <form method="POST" class="selection-form">
+                
+                <div class="form-group">
+                    <label for="final_term">اختر الفصل الدراسي:</label>
+                    <select name="final_term" id="final_term" required>
+                        <option value="">-- اختر الفصل الدراسي --</option>
+                        <option value="term1" {% if selected_term == 'term1' %}selected{% endif %}>الفصل الدراسي الأول</option>
+                        <option value="term2" {% if selected_term == 'term2' %}selected{% endif %}>الفصل الدراسي الثاني</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-submit">عرض جدول نهاية الفصل</button>
+            </form>
+
+            {% if error_message %}
+                <p class="error-msg" style="color: #ff6b6b; margin-top: 15px; text-align: center;">{{ error_message }}</p>
+            {% endif %}
+
+            {% if file_id %}
+                <div class="success-box" style="margin-top: 20px; text-align: center;">
+                    <a href="/drive/file/{{ file_id }}" target="_blank" class="btn-pdf-glowing">عرض وتنزيل جدول الامتحانات النهائية (PDF)</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="footer-copyright" style="margin-top: 40px;">
+            <p>جميع الحقوق محفوظة © روضة ومدرسة القاهرة الإبتدائية الإعدادية</p>
+        </div>
+    </div>
+
+</body>
+</html>
