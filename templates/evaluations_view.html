@@ -56,15 +56,11 @@
         </div>
     </div>
 
-    <!-- كود الجافاسكريبت لربط القوائم وتحديثها ديناميكياً -->
     <script>
         function updateEvalOptions() {
             const term = document.getElementById('eval_term').value;
             const evalType = document.getElementById('eval_type');
-            
-            // تفريغ القائمة التحتية
-            evalType.innerHTML = '<option value="">-- اختر التقييم المطلوب --</option>';
-            
+            evalType.innerHTML = '<option value="" disabled selected>-- اختر التقييم--</option>';
             if (term === 'term1') {
                 evalType.innerHTML += '<option value="eval1">اختبار التقييم الأول</option>';
                 evalType.innerHTML += '<option value="eval2">اختبار التقييم الثاني</option>';
@@ -73,11 +69,9 @@
                 evalType.innerHTML += '<option value="eval4">اختبار التقييم الرابع</option>';
             }
         }
-
-        // الحفاظ على الحالة عند إعادة تحميل الصفحة
         window.onload = function() {
             const selectedTerm = "{{ selected_term }}";
-            const selectedEval = "{{ selected_eval }}";
+            const selectedEval = "{{ selected_type }}";
             if (selectedTerm) {
                 document.getElementById('eval_term').value = selectedTerm;
                 updateEvalOptions();

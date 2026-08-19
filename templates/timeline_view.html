@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>جداول اختبارات نهاية الفصل</title>
+    <title>الجدول الزمني العام</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -14,8 +14,8 @@
         </div>
 
         <div class="hero-section">
-            <h1>جداول اختبارات نهاية الفصل الدراسي</h1>
-            <p>اختر الفصل الدراسي للاطلاع على جدول الامتحانات النهائية</p>
+            <h1>الجدول الزمني العام للمدرسة</h1>
+            <p>اختر الفصل الدراسي للاطلاع على الجدول الزمني العام واستخراجه بكل سهولة</p>
         </div>
 
         <div class="section-box" style="max-width: 600px; margin: auto;">
@@ -23,14 +23,14 @@
                 
                 <div class="form-group">
                     <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-main);">اختر الفصل الدراسي:</label>
-                    <select name="final_term" id="final_term" required>
+                    <select name="timeline_term" id="timeline_term" required>
                         <option value="" disabled selected>--اختر الفصل الدراسي--</option>
                         <option value="term1" {% if selected_term == 'term1' %}selected{% endif %}>الفصل الدراسي الأول</option>
                         <option value="term2" {% if selected_term == 'term2' %}selected{% endif %}>الفصل الدراسي الثاني</option>
                     </select>
                 </div>
 
-                <button type="submit" class="btn-submit">عرض جدول نهاية الفصل</button>
+                <button type="submit" class="btn-submit">عرض الجدول الزمني العام</button>
             </form>
 
             {% if error_message %}
@@ -39,7 +39,7 @@
 
             {% if file_id %}
                 <div class="success-box" style="margin-top: 20px; text-align: center;">
-                    <a href="/drive/file/{{ file_id }}" target="_blank" class="btn-pdf-glowing">عرض وتنزيل جدول الامتحانات النهائية (PDF)</a>
+                    <a href="/drive/file/{{ file_id }}" target="_blank" class="btn-pdf-glowing">عرض وتنزيل الجدول الزمني العام (PDF)</a>
                 </div>
             {% endif %}
         </div>
