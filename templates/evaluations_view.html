@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جداول اختبارات التقييمات</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="container" style="max-width: 700px; margin: auto; padding: 20px;">
+        <div class="back-home" style="text-align: right; margin-bottom: 20px;">
+            <a href="/exams_timeline" class="btn-back">⬅ العودة لقسم الجداول</a>
+        </div>
+
+        <div class="hero-section" style="text-align: center;">
+            <h1>جداول اختبارات التقييمات</h1>
+            <p>اختر الفصل الدراسي لتظهر لك التقييمات الخاصة به بدقة</p>
+        </div>
+
+        <div class="section-box" style="background: rgba(255, 255, 255, 0.05); padding: 30px; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.1);">
+            <form method="POST" class="selection-form">
+                
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="eval_term" style="display: block; margin-bottom: 8px; font-weight: bold;">اختر الفصل الدراسي:</label>
+                    <select name="eval_term" id="eval_term" onchange="updateEvalOptions()" required style="width: 100%; padding: 12px; border-radius: 8px; background: #1a1a2e; color: #fff; border: 1px solid #444;">
+                        <option value="">-- اختر الفصل الدراسي --</option>
+                        <option value="term1" {% if selected_term == 'term1' %}selected{% endif %}>الفصل الدراسي الأول</option>
+                        <option value="term2" {% if selected_term == 'term2' %}selected{% endif %}>الفصل الدراسي الثاني</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="eval_type" style="display: block; margin-bottom: 8px; font-weight: bold;">اختر التقييم:</label>
+                    <select name="eval_type" id="eval_type" required style="width: 100%; padding: 12px; border-radius: 8px; background: #1a1a2e; color: #fff; border: 1px solid #444;">
+                        <option value="">-- اختر الفصل الدراسي أولاً --</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-submit" style="width: 100%; padding: 12px; background: #007bff; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">عرض جدول التقييم</button>
+            </form>
+
+            {% if error_message %}
+                <p class="error-msg" style="color: #ff6b6b; margin-top: 15px; text-align: center;">{{ error_message }}</p>
+            {% endif %}
+
+            {% if file_id %}
+                <div class="success-box" style="margin-top: 25px; text-align: center;">
+                    <a href="/drive/file/{{ file_id }}" target="_blank" class="btn-pdf-glowing" style="display: inline-block; padding: 12px 25px; background: #28a745; color: #fff; border-radius: 8px; text-decoration: none; font-weight: bold; box-shadow: 0 0 15px rgba(40, 167, 69, 0.5);">عرض وتنزيل جدول التقييم (PDF)</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="footer-copyright" style="text-align: center; margin-top: 40px;">
+            <p>جميع الحقوق محفوظة © روضة ومدرسة القاهرة الإبتدائية الإعدادية</p>
+        </div>
+    </div>
+
+    <!-- كود الجافاسكريبت لربط القوائم وتحديثها ديناميكياً -->
+    <script>
+        function updateEvalOptions() {
+            const term = document.getElementById('eval_term').value;
+            const evalType = document.getElementById('eval_type');
+            
+            // تفريغ القائمة التحتية
+            evalType.innerHTML = '<option value="">-- اختر التقييم المطلوب --</option>';
+            
+            if (term === 'term1') {
+                evalType.innerHTML += '<option value="eval1">اختبار التقييم الأول</option>';
+                evalType.innerHTML += '<option value="eval2">اختبار التقييم الثاني</option>';
+            } else if (term === 'term2') {
+                evalType.innerHTML += '<option value="eval3">اختبار التقييم الثالث</option>';
+                evalType.innerHTML += '<option value="eval4">اختبار التقييم الرابع</option>';
+            }
+        }
+
+        // الحفاظ على الحالة عند إعادة تحميل الصفحة
+        window.onload = function() {
+            const selectedTerm = "{{ selected_term }}";
+            const selectedEval = "{{ selected_eval }}";
+            if (selectedTerm) {
+                document.getElementById('eval_term').value = selectedTerm;
+                updateEvalOptions();
+                if (selectedEval) {
+                    document.getElementById('eval_type').value = selectedEval;
+                }
+            }
+        };
+    </script>
+</body>
+</html>
