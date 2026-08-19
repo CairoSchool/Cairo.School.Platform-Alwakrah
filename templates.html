@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>جداول اختبارات التقييمات</title>
+    <style>
+        body { background-color: #0d1117; color: #fff; font-family: Tahoma, sans-serif; margin: 0; padding: 0; }
+        .container { padding: 40px 20px; max-width: 700px; margin: auto; }
+        .main-box { background: rgba(26, 26, 46, 0.85); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 20px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .form-group { margin-bottom: 25px; text-align: right; }
+        .form-group label { display: block; margin-bottom: 10px; font-weight: bold; font-size: 16px; color: #e0e0e0; }
+        .form-group select { width: 100%; padding: 14px; border-radius: 10px; background: #111122; color: #fff; border: 1px solid #444; font-size: 16px; outline: none; }
+        .btn-submit { width: 100%; padding: 14px; background: linear-gradient(135deg, #00b4d8, #0077b6); color: #fff; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        .btn-back { display: inline-block; padding: 12px 30px; background: #162447; color: #fff; border-radius: 30px; text-decoration: none; font-weight: bold; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-box">
+            <h2 style="text-align: center; color: #00b4d8; margin-bottom: 30px;">جداول اختبارات التقييمات</h2>
+            
+            <form method="POST">
+                <div class="form-group">
+                    <label>اختر الفصل الدراسي:</label>
+                    <select name="eval_term" id="eval_term" onchange="updateEvalOptions()" required>
+                        <option value="">-- اختر الفصل الدراسي --</option>
+                        <option value="term1" {% if selected_term == 'term1' %}selected{% endif %}>الفصل الدراسي الأول</option>
+                        <option value="term2" {% if selected_term == 'term2' %}selected{% endif %}>الفصل الدراسي الثاني</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>اختر نوع التقييم:</label>
+                    <select name="eval_type" id="eval_type" required>
+                        <option value="">-- اختر الفصل الدراسي أولاً --</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-submit">استخراج وعرض جدول التقييم 📄</button>
+            </form>
+
+            {% if error_message %}
+                <p style="color: #ff6b6b; text-align: center; margin-top: 20px; font-weight: bold;">{{ error_message }}</p>
+            {% endif %}
+
+            {% if file_id %}
+                <div style="text-align: center; margin-top: 25px;">
+                    <a href="/drive/file/{{ file_id }}" target="_blank" class="btn-submit" style="display: block; text-decoration: none; background: linear-gradient(135deg, #28a745, #1e7e34);">📥 اضغط هنا لعرض الجدول (PDF)</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <div style="text-align: center;">
+            <a href="/exams_timeline" class="btn-back">⬅ العودة لاختيار الأقسام</a>
+        </div>
+    </div>
+
+    <script>
+        function updateEvalOptions() {
+            const term = document.getElementById('eval_term').value;
+            const evalType = document.getElementById('eval_type');
+            evalType.innerHTML = '<option value="">-- اختر نوع التقييم --</option>';
+            
+            if (term === 'term1') {
+                evalType.innerHTML += '<option value="eval1">اختبار التقييم الأول</option>';
+                evalType.innerHTML += '<option value="eval2">اختبار التقييم الثاني</option>';
+            } else if (term === 'term2') {
+                evalType.innerHTML += '<option value="eval3">اختبار التقييم الثالث</option>';
+                evalType.innerHTML += '<option value="eval4">اختبار التقييم الرابع</option>';
+            }
+        }
+        
+        // للحفاظ على الاختيار بعد عمل Submit
+        window.onload = function() {
+            const selectedTerm = "{{ selected_term }}";
+            const selectedEval = "{{ selected_type }}";
+            if (selectedTerm) {
+                document.getElementById('eval_term').value = selectedTerm;
+                updateEvalOptions();
+                if (selectedEval) {
+                    document.getElementById('eval_type').value = selectedEval;
+                }
+            }
+        };
+    </script>
+</body>
+</html>
