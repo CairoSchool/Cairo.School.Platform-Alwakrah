@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الجدول الزمني وجداول الاختبارات - مدرسة القاهرة</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="container">
+        <!-- زر العودة للرئيسية -->
+        <div class="back-home">
+            <a href="/" class="btn-back">🏠 العودة للرئيسية</a>
+        </div>
+
+        <div class="hero-section">
+            <h1>الجدول الزمني وجداول الاختبارات</h1>
+            <p>اختر القسم المطلوب للاطلاع على الجداول واستخراجها بكل سهولة</p>
+        </div>
+
+        <!-- القسم الأول: الجدول الزمني العام -->
+        <div class="section-box">
+            <h2>📅 الجدول الزمني العام</h2>
+            {% if timeline_file_id %}
+                <div class="success-box">
+                    <p>الجدول الزمني متاح الآن للعرض أو التحميل:</p>
+                    <a href="/drive/file/{{ timeline_file_id }}" target="_blank" class="btn-pdf-glowing">عرض وتحميل الجدول الزمني (PDF)</a>
+                </div>
+            {% else %}
+                <p class="not-available">الجدول الزمني غير متاح حالياً، سيتم إضافته قريباً.</p>
+            {% endif %}
+        </div>
+
+        <hr class="divider">
+
+        <!-- القسم الثاني: جدول اختبارات التقييمات -->
+        <div class="section-box">
+            <h2>📝 جداول اختبارات التقييمات</h2>
+            <form method="POST" class="selection-form">
+                <input type="hidden" name="action_type" value="eval_submit">
+                
+                <div class="form-group">
+                    <label for="eval_term">اختر الفصل الدراسي:</label>
+                    <select name="eval_term" id="eval_term" required>
+                        <option value="">-- اختر الفصل الدراسي --</option>
+                        <option value="term1" {% if selected_term_eval == 'term1' %}selected{% endif %}>الفصل الدراسي الأول</option>
+                        <option value="term2" {% if selected_term_eval == 'term2' %}selected{% endif %}>الفصل الدراسي الثاني</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="eval_type">اختر التقييم:</label>
+                    <select name="eval_type" id="eval_type" required>
+                        <option value="">-- اختر نوع التقييم --</option>
+                        <option value="eval1" {% if selected_eval_type == 'eval1' %}selected{% endif %}>التقييم الأول</option>
+                        <option value="eval2" {% if selected_eval_type == 'eval2' %}selected{% endif %}>التقييم الثاني</option>
+                        <option value="eval3" {% if selected_eval_type == 'eval3' %}selected{% endif %}>التقييم الثالث</option>
+                        <option value="eval4" {% if selected_eval_type == 'eval4' %}selected{% endif %}>التقييم الرابع</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-submit">عرض جدول التقييم</button>
+            </form>
+
+            {% if eval_error %}
+                <p class="error-msg">{{ eval_error }}</p>
+            {% endif %}
+
+            {% if eval_file_id %}
+                <div class="success-box">
+                    <a href="/drive/file/{{ eval_file_id }}" target="_blank" class="btn-pdf-glowing">عرض وتنزيل جدول التقييم المطلوب (PDF)</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <hr class="divider">
+
+        <!-- القسم الثالث: جدول اختبارات نهاية الفصل -->
+        <div class="section-box">
+            <h2>🎓 جداول اختبارات نهاية الفصل الدراسي</h2>
+            <form method="POST" class="selection-form">
+                <input type="hidden" name="action_type" value="final_submit">
+                
+                <div class="form-group">
+                    <label for="final_term">اختر الفصل الدراسي:</label>
+                    <select name="final_term" id="final_term" required>
+                        <option value="">-- اختر الفصل الدراسي --</option>
+                        <option value="term1" {% if selected_term_final == 'term1' %}selected{% endif %}>الفصل الدراسي الأول (نهاية الترم)</option>
+                        <option value="term2" {% if selected_term_final == 'term2' %}selected{% endif %}>الفصل الدراسي الثاني (نهاية الترم)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-submit">عرض جدول نهاية الفصل</button>
+            </form>
+
+            {% if final_error %}
+                <p class="error-msg">{{ final_error }}</p>
+            {% endif %}
+
+            {% if final_file_id %}
+                <div class="success-box">
+                    <a href="/drive/file/{{ final_file_id }}" target="_blank" class="btn-pdf-glowing">عرض وتنزيل جدول نهاية الفصل (PDF)</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="footer-copyright">
+            <p>جميع الحقوق محفوظة © روضة ومدرسة القاهرة الإبتدائية الإعدادية</p>
+        </div>
+    </div>
+
+</body>
+</html>
