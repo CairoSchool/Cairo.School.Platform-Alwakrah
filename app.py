@@ -141,12 +141,9 @@ def home():
 # 2. صفحة الجدول الزمني وجداول الاختبارات (البديلة للأنشطة)
 @app.route("/exams_timeline", methods=["GET", "POST"])
 def exams_timeline():
-    timeline_file_id = None
-    eval_file_id = None
-    final_file_id = None
-    
-    eval_error = None
-    final_error = None
+    file_id = None
+    error_message = None
+    active_tab = request.form.get("active_tab", "timeline") # لتحديد القسم النشط
     
     selected_term_eval = ""
     selected_eval_type = ""
@@ -155,44 +152,41 @@ def exams_timeline():
     if request.method == "POST":
         action_type = request.form.get("action_type")
         
-        # أ) جدول اختبارات التقييمات (من مجلد evaluations)
         if action_type == "eval_submit":
-            selected_term_eval = request.form.get("eval_term") # term1 أو term2
-            selected_eval_type = request.form.get("eval_type") # eval1, eval2, eval3, eval4
+            active_tab = "evaluations"
+            selected_term_eval = request.form.get("eval_term")
+            selected_eval_type = request.form.get("eval_type")
             
             if selected_term_eval and selected_eval_type:
                 filename = f"{selected_term_eval}_{selected_eval_type}.pdf"
-                found_id = find_exam_or_timeline_file("evaluations", filename)
-                if found_id:
-                    eval_file_id = found_id
-                else:
-                    eval_error = "عذراً، جدول اختبار التقييم المطلوب غير متاح حالياً."
+                file_id = find_exam_or_timeline_file("evaluations", filename)
+                if not file_id:
+                    error_message = "عذراً، جدول التقييم المطلوب غير متاح حالياً."
             else:
-                eval_error = "يرجى اختيار الفصل الدراسي ونوع التقييم بدقة."
+                error_message = "يرجى اختيار الفصل الدراسي ونوع التقييم بدقة."
 
-        # ب) جدول اختبار نهاية الفصل (من مجلد finals)
         elif action_type == "final_submit":
-            selected_term_final = request.form.get("final_term") # term1 أو term2
+            active_tab = "finals"
+            selected_term_final = request.form.get("final_term")
             
             if selected_term_final:
                 filename = f"{selected_term_final}_final.pdf"
-                found_id = find_exam_or_timeline_file("finals", filename)
-                if found_id:
-                    final_file_id = found_id
-                else:
-                    final_error = "عذراً، جدول اختبار نهاية الفصل غير متاح حالياً."
+                file_id = find_exam_or_timeline_file("finals", filename)
+                if not file_id:
+                    error_message = "عذراً، جدول اختبار نهاية الفصل غير متاح حالياً."
             else:
-                final_error = "يرجى اختيار الفصل الدراسي بدقة."
+                error_message = "يرجى اختيار الفصل الدراسي."
 
-    # جلب الجدول الزمني الرئيسي (من مجلد timeline)
-    timeline_file_id = find_exam_or_timeline_file("timeline", "timeline.pdf")
+        elif action_type == "timeline_submit":
+            active_tab = "timeline"
+            file_id = find_exam_or_timeline_file("timeline", "timeline.pdf")
+            if not file_id:
+                error_message = "عذراً، الجدول الزمني العام غير متاح حالياً."
 
     return render_template("exams_timeline.html",
-                           timeline_file_id=timeline_file_id,
-                           eval_file_id=eval_file_id,
-                           final_file_id=final_file_id,
-                           eval_error=eval_error,
-                           final_error=final_error,
+                           file_id=file_id,
+                           error_message=error_message,
+                           active_tab=active_tab,
                            selected_term_eval=selected_term_eval,
                            selected_eval_type=selected_eval_type,
                            selected_term_final=selected_term_final)
