@@ -4,20 +4,127 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الجدول الزمني وجداول الاختبارات</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
-        body { background-color: #0d1117; color: #fff; font-family: Tahoma, sans-serif; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .container { width: 100%; max-width: 950px; padding: 20px; box-sizing: border-box; }
-        .main-form-box { background: rgba(26, 26, 46, 0.85); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 20px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; }
-        .hero-section h1 { font-size: 26px; margin-bottom: 10px; color: #fff; }
-        .hero-section p { color: #a0a0a0; font-size: 15px; margin-bottom: 30px; }
-        .services-grid { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin: 30px 0; }
-        .service-card { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px 15px; border-radius: 12px; background: rgba(255, 255, 255, 0.03); border: 2px solid rgba(255, 255, 255, 0.1); transition: all 0.3s ease; width: 230px; color: #fff; text-decoration: none; }
-        .service-card:hover { border-color: #00b4d8; background: rgba(0, 180, 216, 0.1); transform: translateY(-4px); }
-        .service-card h3 { margin-top: 12px; font-size: 16px; }
-        .service-card span { font-size: 35px; }
-        .btn-back { display: inline-block; padding: 12px 35px; background: linear-gradient(135deg, #0077b6, #00b4d8); color: #fff; border-radius: 30px; text-decoration: none; font-weight: bold; margin-top: 20px; transition: 0.3s; }
-        .btn-back:hover { opacity: 0.9; transform: translateY(-2px); }
-        .footer-note { margin-top: 30px; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 20px; font-size: 13px; color: #888; }
+        /* استخدام الـ style العام للموقع لضمان تطابق الخلفية والأنماط */
+        body {
+            background: var(--bg-main, #0d1117);
+            color: var(--text-main, #fff);
+            font-family: 'Cairo', Tahoma, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .main-form-box {
+            background: var(--box-bg, rgba(26, 26, 46, 0.85));
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        .hero-section h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #fff;
+            font-weight: 700;
+        }
+        .hero-section p {
+            color: #a0a0a0;
+            font-size: 15px;
+            margin-bottom: 35px;
+        }
+        /* ضبط المربعات الثلاثة لتكون في صف واحد بجانب بعضها مع مرونة للشاشات الصغيرة */
+        .services-grid {
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            gap: 20px;
+            flex-wrap: nowrap;
+            margin: 30px 0;
+        }
+        .service-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 30px 20px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            width: 30%;
+            min-width: 220px;
+            color: #fff;
+            text-decoration: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .service-card:hover {
+            border-color: #00b4d8;
+            background: rgba(0, 180, 216, 0.12);
+            transform: translateY(-6px);
+            box-shadow: 0 10px 25px rgba(0, 180, 216, 0.3);
+        }
+        .service-card h3 {
+            margin-top: 15px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .service-card span {
+            font-size: 40px;
+        }
+        
+        /* زر العودة الحديث والاحترافي */
+        .btn-modern-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #0077b6, #00b4d8);
+            color: #fff;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 15px;
+            margin-top: 25px;
+            box-shadow: 0 4px 15px rgba(0, 180, 216, 0.4);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .btn-modern-back:hover {
+            background: linear-gradient(135deg, #005f87, #0096c7);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 180, 216, 0.6);
+        }
+
+        .footer-note {
+            margin-top: 35px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 20px;
+            font-size: 13px;
+            color: #888;
+        }
+
+        /* تحويل الشاشات الصغيرة جداً لتصبح عمودية لضمان عدم تداخل التصميم */
+        @media (max-width: 768px) {
+            .services-grid {
+                flex-wrap: wrap;
+            }
+            .service-card {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -25,9 +132,10 @@
         <div class="main-form-box">
             <div class="hero-section">
                 <h1>الجدول الزمني وجداول الاختبارات</h1>
-                <p>اختر القسم المطلوب للانتقال إلى صفحته المستقلة وعرض بياناته</p>
+                <p>اختر القسم المطلوب للانتقال إلى صفحته المستقلة وعرض بياناته بكل سهولة</p>
             </div>
 
+            <!-- المربعات الثلاثة في صف واحد -->
             <div class="services-grid">
                 <a href="/exams_timeline/timeline" class="service-card">
                     <span>📅</span>
@@ -44,7 +152,10 @@
             </div>
 
             <div>
-                <a href="/" class="btn-back">⬅ العودة للصفحة الرئيسية</a>
+                <a href="/" class="btn-modern-back">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    العودة للصفحة الرئيسية
+                </a>
             </div>
 
             <div class="footer-note">
