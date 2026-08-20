@@ -175,15 +175,39 @@ def finals_page():
 
 @app.route("/schedule_select", methods=["GET", "POST"])
 def schedule_select():
-    file_id = None
+    pdf_file_id = None
     error_message = None
+    searched = False  # مهم جداً
+    selected_section = ""
+    selected_grade = ""
+    
     if request.method == "POST":
-        section = request.form.get("section")
-        grade = request.form.get("grade")
-        if section and grade:
-            file_id = find_nested_file_in_drive(section, f"{grade}.pdf")
-            if not file_id: error_message = "لا يوجد جدول متاح حالياً."
-    return render_template("schedule_select.html", pdf_file_id=file_id, error_message=error_message)
+        searched = True  # تحويله إلى True لأن المستخدم ضغط بحث
+        selected_section = request.form.get("section")
+        selected_grade = request.form.get("grade")
+        
+        if selected_section and selected_grade:
+            filename = f"{selected_grade}.pdf" # أو حسب اسم الملف في درايف
+            
+            # تتبع مجلدات الجداول: static -> schedules -> section -> grade.pdf
+            static_folder_id = find_subfolder_id_by_name(ROOT_FOLDER_ID, 'static')
+            schedules_main_id = find_subfolder_id_by_name(static_folder_id, 'schedules') if static_folder_id else None
+            section_folder_id = find_subfolder_id_by_name(schedules_main_id, selected_section) if schedules_main_id else None
+            
+            if section_folder_id:
+                pdf_file_id = search_file_in_drive(section_folder_id, filename)
+                
+            if not pdf_file_id:
+                error_message = "عذراً، لم يتم العثور على جدول لهذا الفصل حالياً."
+        else:
+            error_message = "يرجى اختيار القسم والفصل بدقة."
+            
+    return render_template("schedule_select.html", 
+                           searched=searched, 
+                           pdf_file_id=pdf_file_id, 
+                           error_message=error_message, 
+                           selected_section=selected_section, 
+                           selected_grade=selected_grade)
 
 @app.route("/certificate", methods=["GET", "POST"])
 def certificate():
