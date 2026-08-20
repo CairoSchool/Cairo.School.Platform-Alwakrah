@@ -127,33 +127,37 @@ def evaluations_page():
     error_message = None
     searched = False
     selected_term = ""
-    selected_eval = ""
+    selected_eval = ""  # المتغير الخاص بالتقييم
     
     if request.method == "POST":
         searched = True
-        selected_term = request.form.get("term")
-        selected_eval = request.form.get("eval")
-        print(f"DEBUG EVAL - Term: {selected_term}, Eval: {selected_eval}")
+        # التقاط القيم بالأسماء الصحيحة القادمة من الـ HTML الخاص بك
+        selected_term = request.form.get("eval_term")
+        selected_eval = request.form.get("eval_type")
         
         if selected_term and selected_eval:
+            # تكوين اسم الملف ليصبح مثلاً: term1_eval1.pdf
             filename = f"{selected_term}_{selected_eval}.pdf"
-            print(f"DEBUG EVAL - Target filename: {filename}")
             
+            # مسار البحث: static -> exams_timeline -> evaluations
             static_folder_id = find_subfolder_id_by_name(ROOT_FOLDER_ID, 'static')
             exams_main_id = find_subfolder_id_by_name(static_folder_id, 'exams_timeline') if static_folder_id else None
             eval_folder_id = find_subfolder_id_by_name(exams_main_id, 'evaluations') if exams_main_id else None
-            print(f"DEBUG EVAL - eval_folder_id: {eval_folder_id}")
             
             if eval_folder_id:
-                file_id = search_file_id_in_drive(eval_folder_id, filename) # أو search_file_in_drive حسب اسم دالتك
-                print(f"DEBUG EVAL - Result file_id: {file_id}")
-                
+                file_id = search_file_in_drive(eval_folder_id, filename)
+            
             if not file_id:
                 error_message = "عذراً، هذا التقييم غير متاح حالياً."
         else:
             error_message = "يرجى اختيار الفصل والتقييم."
             
-    return render_template("evaluations_view.html", searched=searched, file_id=file_id, error_message=error_message, selected_term=selected_term, selected_eval=selected_eval)
+    return render_template("evaluations_view.html", 
+                           searched=searched, 
+                           file_id=file_id, 
+                           error_message=error_message, 
+                           selected_term=selected_term, 
+                           selected_type=selected_eval) # تمريرها بالاسم المطابق للـ HTML
 
 @app.route("/exams_timeline/finals", methods=["GET", "POST"])
 def finals_page():
