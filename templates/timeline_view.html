@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الجدول الزمني العام</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="container" style="max-width: 700px; margin: auto; padding: 20px;">
+        <div class="back-home" style="text-align: right; margin-bottom: 20px;">
+            <a href="/exams_timeline" class="btn" style="padding: 8px 20px; border-radius: 50px; font-size: 14px;">⬅ العودة لقسم الجداول</a>
+        </div>
+
+        <div class="hero-section" style="text-align: center;">
+            <h1>الجدول الزمني العام</h1>
+            <p>يمكنك الآن الاطلاع على الجدول الزمني العام للمدرسة وتنزيله بصيغة PDF</p>
+        </div>
+
+        <div class="section-box" style="background: rgba(255, 255, 255, 0.05); padding: 40px; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.1); text-align: center;">
+            
+            <!-- أيقونة تعبيرية شكلها احترافي -->
+            <div style="font-size: 60px; margin-bottom: 20px;">📅</div>
+            
+            <h3 style="margin-bottom: 20px; color: #f8fafc;">الجدول الزمني العام للمدرسة</h3>
+
+            <!-- زر عرض وتنزيل الـ PDF المباشر -->
+            <div class="success-box" style="margin-top: 20px;">
+                <!-- استبدل "YOUR_FILE_ID" بمعرف ملف الـ PDF الخاص بك من جوجل درايف أو الـ Route المناسب -->
+                <a href="/drive/file/TIMELINE_FILE_ID" target="_blank" class="btn" style="display: inline-block; padding: 15px 30px; background: #28a745; color: #fff; border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 16px; box-shadow: 0 0 20px rgba(40, 167, 69, 0.4);">
+                    عرض وتنزيل الجدول الزمني (PDF)
+                </a>
+            </div>
+
+        </div>
+
+        <div class="footer-copyright" style="text-align: center; margin-top: 40px;">
+            <p>جميع الحقوق محفوظة © روضة ومدرسة القاهرة الإبتدائية الإعدادية</p>
+        </div>
+    </div>
+
+</body>
+</html>
