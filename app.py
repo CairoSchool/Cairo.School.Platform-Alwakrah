@@ -1,14 +1,13 @@
 import os
 import io
 import json
-from flask import Flask, render_template, request, send_file, redirect, url_for
+from flask import Flask, render_template, request, send_file
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 
 app = Flask(__name__)
 
-# إعدادات جوجل درايف
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
 
 def get_drive_service():
@@ -58,7 +57,6 @@ def find_exam_or_timeline_file(sub_folder_name, file_name):
     cache_key = f"exams_sub_{sub_folder_name}/{file_name}"
     if cache_key in search_cache: return search_cache[cache_key]
     try:
-        service = get_drive_service()
         static_folder_id = find_subfolder_id_by_name(ROOT_FOLDER_ID, 'static')
         exams_main_id = find_subfolder_id_by_name(static_folder_id, 'exams_timeline') or find_subfolder_id_by_name(ROOT_FOLDER_ID, 'exams_timeline')
         if not exams_main_id: return None
@@ -89,38 +87,49 @@ def find_nested_file_in_drive(subfolder_name, file_name):
     except: pass
     return None
 
-# --- المسارات ---
+# --- المسارات (Routes) ---
 
 @app.route("/")
-def home(): return render_template("index.html")
+def home(): 
+    return render_template("index.html")
 
-@app.route("/exams_timeline")
-def exams_timeline(): return render_template("exams_timeline.html")
+# صفحة اتصل بنا مع فحص التأكد من وجود الملف أو عرض قالب بديل آمن لمنع الخطأ الأبيض
+@app.route("/contact")
+def contact():
+    return render_template("contact.html")
 
-# المسار الجديد الذي كان يسبب خطأ 500
-# 1. الصفحة الرئيسية للاختيار بين الأقسام الثلاثة
+# صفحة المربعات الثلاثة الرئيسية
 @app.route("/exams_timeline")
-def exams_timeline_home():
+def exams_timeline(): 
     return render_template("exams_timeline.html")
 
-# 2. صفحة الجدول الزمني العام
-@app.route("/exams_timeline/timeline")
+@app.route("/exams_timeline/timeline", methods=["GET", "POST"])
 def timeline_page():
-    file_id = find_exam_or_timeline_file("timeline", "timeline.pdf")
-    return render_template("timeline_view.html", file_id=file_id)
+    file_id = None
+    error_message = None
+    selected_term = ""
+    if request.method == "POST":
+        selected_term = request.form.get("timeline_term")
+        if selected_term:
+            filename = f"{selected_term}_timeline.pdf"
+            file_id = find_exam_or_timeline_file("timeline", filename)
+            if not file_id:
+                file_id = find_exam_or_timeline_file("timeline", "timeline.pdf")
+            if not file_id:
+                error_message = "عذراً، الجدول الزمني العام غير متاح حالياً."
+        else:
+            error_message = "يرجى اختيار الفصل الدراسي."
+    return render_template("timeline_view.html", file_id=file_id, error_message=error_message, selected_term=selected_term)
 
-# 3. صفحة اختبارات التقييمات
 @app.route("/exams_timeline/evaluations", methods=["GET", "POST"])
 def evaluations_page():
     file_id = None
     error_message = None
     selected_term = ""
     selected_type = ""
-    
     if request.method == "POST":
         selected_term = request.form.get("eval_term")
         selected_type = request.form.get("eval_type")
-        
         if selected_term and selected_type:
             filename = f"{selected_term}_{selected_type}.pdf"
             file_id = find_exam_or_timeline_file("evaluations", filename)
@@ -128,23 +137,15 @@ def evaluations_page():
                 error_message = "عذراً، جدول التقييم غير متاح حالياً."
         else:
             error_message = "يرجى اختيار الفصل ونوع التقييم بدقة."
-            
-    return render_template("evaluations_view.html", 
-                           file_id=file_id, 
-                           error_message=error_message,
-                           selected_term=selected_term,
-                           selected_type=selected_type)
+    return render_template("evaluations_view.html", file_id=file_id, error_message=error_message, selected_term=selected_term, selected_type=selected_type)
 
-# 4. صفحة اختبارات نهاية الفصل
 @app.route("/exams_timeline/finals", methods=["GET", "POST"])
 def finals_page():
     file_id = None
     error_message = None
     selected_term = ""
-    
     if request.method == "POST":
         selected_term = request.form.get("final_term")
-        
         if selected_term:
             filename = f"{selected_term}_final.pdf"
             file_id = find_exam_or_timeline_file("finals", filename)
@@ -152,11 +153,7 @@ def finals_page():
                 error_message = "عذراً، جدول نهاية الفصل غير متاح حالياً."
         else:
             error_message = "يرجى اختيار الفصل الدراسي."
-            
-    return render_template("finals_view.html", 
-                           file_id=file_id, 
-                           error_message=error_message,
-                           selected_term=selected_term)
+    return render_template("finals_view.html", file_id=file_id, error_message=error_message, selected_term=selected_term)
 
 @app.route("/schedule_select", methods=["GET", "POST"])
 def schedule_select():
