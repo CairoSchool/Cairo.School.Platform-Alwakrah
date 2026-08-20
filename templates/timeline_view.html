@@ -15,24 +15,36 @@
 
         <div class="hero-section" style="text-align: center;">
             <h1>الجدول الزمني العام</h1>
-            <p>يمكنك الآن الاطلاع على الجدول الزمني العام للمدرسة وتنزيله بصيغة PDF</p>
+            <p>اختر الفصل الدراسي للاطلاع على الجدول الزمني العام للمدرسة وتنزيله بصيغة PDF</p>
         </div>
 
-        <div class="section-box" style="background: rgba(255, 255, 255, 0.05); padding: 40px; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.1); text-align: center;">
-            
-            <!-- أيقونة تعبيرية شكلها احترافي -->
-            <div style="font-size: 60px; margin-bottom: 20px;">📅</div>
-            
-            <h3 style="margin-bottom: 20px; color: #f8fafc;">الجدول الزمني العام للمدرسة</h3>
+        <!-- فورم اختيار الفصل الدراسي للجدول الزمني -->
+        <div class="section-box" style="background: rgba(255, 255, 255, 0.05); padding: 30px; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.1);">
+            <form method="POST" class="selection-form">
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="timeline_term" style="display: block; margin-bottom: 8px; font-weight: bold; color: #f8fafc;">اختر الفصل الدراسي:</label>
+                    <select name="timeline_term" id="timeline_term" required style="width: 100%; padding: 12px; border-radius: 8px; background: #1a1a2e; color: #fff; border: 1px solid #444;">
+                        <option value="">-- اختر الفصل الدراسي --</option>
+                        <option value="term1" {% if selected_term == 'term1' %}selected{% endif %}>الفصل الدراسي الأول</option>
+                        <option value="term2" {% if selected_term == 'term2' %}selected{% endif %}>الفصل الدراسي الثاني</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn" style="width: 100%; padding: 12px; background: #007bff; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">عرض الجدول الزمني</button>
+            </form>
 
-            <!-- زر عرض وتنزيل الـ PDF المباشر -->
-            <div class="success-box" style="margin-top: 20px;">
-                <!-- استبدل "YOUR_FILE_ID" بمعرف ملف الـ PDF الخاص بك من جوجل درايف أو الـ Route المناسب -->
-                <a href="/drive/file/TIMELINE_FILE_ID" target="_blank" class="btn" style="display: inline-block; padding: 15px 30px; background: #28a745; color: #fff; border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 16px; box-shadow: 0 0 20px rgba(40, 167, 69, 0.4);">
-                    عرض وتنزيل الجدول الزمني (PDF)
-                </a>
-            </div>
+            {% if error_message %}
+                <div class="error-alert" style="background: rgba(255, 107, 107, 0.15); border: 1px solid #ff6b6b; color: #ff8787; padding: 15px; border-radius: 12px; margin-top: 20px; text-align: center; font-weight: 600;">
+                    <span>{{ error_message }}</span>
+                </div>
+            {% endif %}
 
+            {% if file_id %}
+                <div class="success-box" style="margin-top: 25px; text-align: center;">
+                    <a href="{{ url_for('serve_drive_file', file_id=file_id) }}" target="_blank" class="btn" style="display: inline-block; padding: 12px 25px; background: #28a745; color: #fff; border-radius: 8px; text-decoration: none; font-weight: bold; box-shadow: 0 0 15px rgba(40, 167, 69, 0.5);">
+                        عرض وتنزيل الجدول الزمني (PDF) 📄
+                    </a>
+                </div>
+            {% endif %}
         </div>
 
         <div class="footer-copyright" style="text-align: center; margin-top: 40px;">
