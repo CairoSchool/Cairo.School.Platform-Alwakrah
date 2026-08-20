@@ -125,19 +125,35 @@ def timeline_page():
 def evaluations_page():
     file_id = None
     error_message = None
+    searched = False
     selected_term = ""
-    selected_type = ""
+    selected_eval = ""
+    
     if request.method == "POST":
-        selected_term = request.form.get("eval_term")
-        selected_type = request.form.get("eval_type")
-        if selected_term and selected_type:
-            filename = f"{selected_term}_{selected_type}.pdf"
-            file_id = find_exam_or_timeline_file("evaluations", filename)
+        searched = True
+        selected_term = request.form.get("term")
+        selected_eval = request.form.get("eval")
+        print(f"DEBUG EVAL - Term: {selected_term}, Eval: {selected_eval}")
+        
+        if selected_term and selected_eval:
+            filename = f"{selected_term}_{selected_eval}.pdf"
+            print(f"DEBUG EVAL - Target filename: {filename}")
+            
+            static_folder_id = find_subfolder_id_by_name(ROOT_FOLDER_ID, 'static')
+            exams_main_id = find_subfolder_id_by_name(static_folder_id, 'exams_timeline') if static_folder_id else None
+            eval_folder_id = find_subfolder_id_by_name(exams_main_id, 'evaluations') if exams_main_id else None
+            print(f"DEBUG EVAL - eval_folder_id: {eval_folder_id}")
+            
+            if eval_folder_id:
+                file_id = search_file_id_in_drive(eval_folder_id, filename) # أو search_file_in_drive حسب اسم دالتك
+                print(f"DEBUG EVAL - Result file_id: {file_id}")
+                
             if not file_id:
-                error_message = "عذراً، جدول التقييم غير متاح حالياً."
+                error_message = "عذراً، هذا التقييم غير متاح حالياً."
         else:
-            error_message = "يرجى اختيار الفصل ونوع التقييم بدقة."
-    return render_template("evaluations_view.html", file_id=file_id, error_message=error_message, selected_term=selected_term, selected_type=selected_type)
+            error_message = "يرجى اختيار الفصل والتقييم."
+            
+    return render_template("evaluations_view.html", searched=searched, file_id=file_id, error_message=error_message, selected_term=selected_term, selected_eval=selected_eval)
 
 @app.route("/exams_timeline/finals", methods=["GET", "POST"])
 def finals_page():
