@@ -146,16 +146,26 @@ def finals_page():
     selected_term = ""
     if request.method == "POST":
         selected_term = request.form.get("final_term")
+        print(f"DEBUG: Selected term is: {selected_term}") # طباعة الفصل المختار
         if selected_term:
             filename = f"{selected_term}_final.pdf"
-            # البحث داخل مجلد finals ثم داخل مجلد الفصل (مثل term_1 أو term_2)
+            print(f"DEBUG: Target filename is: {filename}") # طباعة اسم الملف المطلوب
+            
             static_folder_id = find_subfolder_id_by_name(ROOT_FOLDER_ID, 'static')
+            print(f"DEBUG: static_folder_id: {static_folder_id}")
+            
             exams_main_id = find_subfolder_id_by_name(static_folder_id, 'exams_timeline') if static_folder_id else None
+            print(f"DEBUG: exams_main_id: {exams_main_id}")
+            
             finals_folder_id = find_subfolder_id_by_name(exams_main_id, 'finals') if exams_main_id else None
+            print(f"DEBUG: finals_folder_id: {finals_folder_id}")
+            
             term_folder_id = find_subfolder_id_by_name(finals_folder_id, selected_term) if finals_folder_id else None
+            print(f"DEBUG: term_folder_id ({selected_term}): {term_folder_id}")
             
             if term_folder_id:
                 file_id = search_file_in_drive(term_folder_id, filename)
+                print(f"DEBUG: Found file_id: {file_id}")
                 
             if not file_id:
                 error_message = "عذراً، جدول نهاية الفصل غير متاح حالياً."
