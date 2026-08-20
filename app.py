@@ -57,8 +57,9 @@ def find_exam_or_timeline_file(sub_folder_name, file_name):
     cache_key = f"exams_sub_{sub_folder_name}/{file_name}"
     if cache_key in search_cache: return search_cache[cache_key]
     try:
+        # مسار: School Project / static / exams_timeline / [sub_folder_name]
         static_folder_id = find_subfolder_id_by_name(ROOT_FOLDER_ID, 'static')
-        exams_main_id = find_subfolder_id_by_name(static_folder_id, 'exams_timeline') or find_subfolder_id_by_name(ROOT_FOLDER_ID, 'exams_timeline')
+        exams_main_id = find_subfolder_id_by_name(static_folder_id, 'exams_timeline') if static_folder_id else None
         if not exams_main_id: return None
         sub_folder_id = find_subfolder_id_by_name(exams_main_id, sub_folder_name)
         if not sub_folder_id: return None
@@ -73,12 +74,16 @@ def find_nested_file_in_drive(subfolder_name, file_name):
     cache_key = f"{subfolder_name}/{file_name}"
     if cache_key in search_cache: return search_cache[cache_key]
     try:
+        # مسار الجداول: School Project / static / schedules / [subfolder_name] (مثل arabic, languages)
+        # مسار الشهادات: School Project / certificates / [subfolder_name] (مثل cert1, cert2, final, mid)
         static_folder_id = find_subfolder_id_by_name(ROOT_FOLDER_ID, 'static')
-        schedules_folder_id = find_subfolder_id_by_name(static_folder_id, 'schedules')
-        section_folder_id = find_subfolder_id_by_name(schedules_folder_id, subfolder_name)
+        schedules_folder_id = find_subfolder_id_by_name(static_folder_id, 'schedules') if static_folder_id else None
+        section_folder_id = find_subfolder_id_by_name(schedules_folder_id, subfolder_name) if schedules_folder_id else None
+        
         if not section_folder_id:
-            cert_folder_id = find_subfolder_id_by_name(ROOT_FOLDER_ID, 'certificates') or find_subfolder_id_by_name(ROOT_FOLDER_ID, subfolder_name)
-            section_folder_id = cert_folder_id
+            cert_root_id = find_subfolder_id_by_name(ROOT_FOLDER_ID, 'certificates')
+            if cert_root_id:
+                section_folder_id = find_subfolder_id_by_name(cert_root_id, subfolder_name)
         
         file_id = search_file_in_drive(section_folder_id, file_name) if section_folder_id else None
         if file_id:
@@ -93,12 +98,10 @@ def find_nested_file_in_drive(subfolder_name, file_name):
 def home(): 
     return render_template("index.html")
 
-# صفحة اتصل بنا مع فحص التأكد من وجود الملف أو عرض قالب بديل آمن لمنع الخطأ الأبيض
 @app.route("/contact")
 def contact():
     return render_template("contact.html")
 
-# صفحة المربعات الثلاثة الرئيسية
 @app.route("/exams_timeline")
 def exams_timeline(): 
     return render_template("exams_timeline.html")
