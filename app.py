@@ -131,24 +131,30 @@ def evaluations_page():
     
     if request.method == "POST":
         searched = True
-        selected_term = request.form.get("eval_term")
-        selected_eval = request.form.get("eval_type")
+        selected_term = request.form.get("eval_term") # مثال: term1 أو term2
+        selected_eval = request.form.get("eval_type") # مثال: eval1, eval2, eval3, eval4
         
-        # أضف هذه الـ prints لكي تظهر في اللوجز مثل الـ Finals
         print(f"DEBUG EVAL - Term: {selected_term}")
         print(f"DEBUG EVAL - Eval Type: {selected_eval}")
         
         if selected_term and selected_eval:
+            # تكوين اسم الملف تماماً كما طلبت (مثال: term1_eval1.pdf أو term2_eval3.pdf)
             filename = f"{selected_term}_{selected_eval}.pdf"
             print(f"DEBUG EVAL - Target filename: {filename}")
             
+            # تسلسل المجلدات: static -> exams_timeline -> evaluations
             static_folder_id = find_subfolder_id_by_name(ROOT_FOLDER_ID, 'static')
             exams_main_id = find_subfolder_id_by_name(static_folder_id, 'exams_timeline') if static_folder_id else None
             eval_folder_id = find_subfolder_id_by_name(exams_main_id, 'evaluations') if exams_main_id else None
-            print(f"DEBUG EVAL - eval_folder_id: {eval_folder_id}")
             
-            if eval_folder_id:
-                file_id = search_file_in_drive(eval_folder_id, filename)
+            # ربط term1 بـ term_1، و term2 بـ term_2
+            term_folder_name = "term_1" if selected_term == "term1" else "term_2"
+            term_subfolder_id = find_subfolder_id_by_name(eval_folder_id, term_folder_name) if eval_folder_id else None
+            
+            print(f"DEBUG EVAL - term_subfolder_id: {term_subfolder_id}")
+            
+            if term_subfolder_id:
+                file_id = search_file_in_drive(term_subfolder_id, filename)
                 print(f"DEBUG EVAL - Found file_id: {file_id}")
                 
             if not file_id:
