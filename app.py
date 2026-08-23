@@ -103,23 +103,19 @@ def contact():
 def exams_timeline(): 
     return render_template("exams_timeline.html")
 
-@app.route("/exams_timeline/timeline", methods=["GET", "POST"])
+@app.route("/exams_timeline/timeline", methods=["GET"])
 def timeline_page():
     file_id = None
     error_message = None
-    selected_term = ""
-    if request.method == "POST":
-        selected_term = request.form.get("timeline_term")
-        if selected_term:
-            filename = f"{selected_term}_timeline.pdf"
-            file_id = find_exam_or_timeline_file("timeline", filename)
-            if not file_id:
-                file_id = find_exam_or_timeline_file("timeline", "timeline.pdf")
-            if not file_id:
-                error_message = "عذراً، الجدول الزمني العام غير متاح حالياً."
-        else:
-            error_message = "يرجى اختيار الفصل الدراسي."
-    return render_template("timeline_view.html", file_id=file_id, error_message=error_message, selected_term=selected_term)
+    
+    # اسم الملف الثابت للجدول الزمني العام داخل مجلد timeline
+    filename = "timeline.pdf"
+    file_id = find_exam_or_timeline_file("timeline", filename)
+    
+    if not file_id:
+        error_message = "عذراً، الجدول الزمني غير متاح حالياً."
+        
+    return render_template("timeline_view.html", file_id=file_id, error_message=error_message)
 
 @app.route("/exams_timeline/evaluations", methods=["GET", "POST"])
 def evaluations_page():
