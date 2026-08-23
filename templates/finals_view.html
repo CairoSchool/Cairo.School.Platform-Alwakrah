@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>جداول اختبارات نهاية الفصل</title>
+    <title>الجدول الزمني العام</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -17,37 +17,30 @@
         </div>
 
         <div class="hero-section" style="text-align: center;">
-            <h1>جداول اختبارات نهاية الفصل</h1>
-            <p>اختر الفصل الدراسي للاطلاع على جدول الامتحانات النهائية</p>
+            <h1>الجدول الزمني العام</h1>
+            <p>اطلاع مباشر على الجدول الزمني العام للمدرسة وتنزيله بصيغة PDF</p>
         </div>
 
-        <div class="section-box" style="background: rgba(255, 255, 255, 0.05); padding: 30px; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.1);">
-            <form method="POST" class="selection-form">
-                
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label for="final_term" style="display: block; margin-bottom: 8px; font-weight: bold;">اختر الفصل الدراسي:</label>
-                    <select name="final_term" id="final_term" required style="width: 100%; padding: 12px; border-radius: 8px; background: #1a1a2e; color: #fff; border: 1px solid #444;">
-                        <option value="">-- اختر الفصل الدراسي --</option>
-                        <option value="term_1" {% if selected_term == 'term_1' %}selected{% endif %}>الفصل الدراسي الأول</option>
-                        <option value="term_2" {% if selected_term == 'term_2' %}selected{% endif %}>الفصل الدراسي الثاني</option>
-                    </select>
-                </div>
-
-                <button type="submit" class="btn-submit" style="width: 100%; padding: 12px; background: #007bff; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">عرض جدول نهاية الفصل</button>
-            </form>
-
+        <div class="section-box" style="background: rgba(255, 255, 255, 0.05); padding: 40px 30px; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.1); text-align: center;">
+            
             {% if error_message %}
-                <div class="error-alert" style="background: rgba(255, 107, 107, 0.15); border: 1px solid #ff6b6b; color: #ff8787; padding: 15px; border-radius: 12px; margin-top: 20px; text-align: center; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.2);">
+                <div class="error-alert" style="background: rgba(255, 107, 107, 0.15); border: 1px solid #ff6b6b; color: #ff8787; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.2);">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
                     <span>{{ error_message }}</span>
                 </div>
             {% endif %}
 
             {% if file_id %}
-                <div class="success-box" style="margin-top: 25px; text-align: center;">
-                    <a href="/drive/file/{{ file_id }}" target="_blank" class="btn-pdf-glowing" style="display: inline-block; padding: 12px 25px; background: #28a745; color: #fff; border-radius: 8px; text-decoration: none; font-weight: bold; box-shadow: 0 0 15px rgba(40, 167, 69, 0.5);">عرض وتنزيل جدول الامتحانات النهائية (PDF)</a>
+                <div class="success-box">
+                    <p style="margin-bottom: 20px; color: #ccc; font-size: 16px;">الجدول الزمني متاح وجاهز للاطلاع أو التحميل الفوري:</p>
+                    <a href="/drive/file/{{ file_id }}" target="_blank" class="btn-pdf-glowing" style="display: inline-block; padding: 14px 30px; background: #28a745; color: #fff; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px; box-shadow: 0 0 20px rgba(40, 167, 69, 0.5);">عرض وتنزيل الجدول الزمني (PDF)</a>
+                </div>
+            {% else %}
+                <div class="error-alert" style="background: rgba(255, 107, 107, 0.15); border: 1px solid #ff6b6b; color: #ff8787; padding: 15px; border-radius: 12px; text-align: center; font-weight: 600;">
+                    <span>عذراً، الجدول الزمني غير متاح حالياً في المجلد المخصص.</span>
                 </div>
             {% endif %}
+
         </div>
 
         <div class="footer-copyright" style="text-align: center; margin-top: 40px;">
