@@ -127,26 +127,30 @@ def evaluations_page():
     error_message = None
     searched = False
     selected_term = ""
-    selected_eval = ""  # المتغير الخاص بالتقييم
+    selected_eval = ""
     
     if request.method == "POST":
         searched = True
-        # التقاط القيم بالأسماء الصحيحة القادمة من الـ HTML الخاص بك
         selected_term = request.form.get("eval_term")
         selected_eval = request.form.get("eval_type")
         
+        # أضف هذه الـ prints لكي تظهر في اللوجز مثل الـ Finals
+        print(f"DEBUG EVAL - Term: {selected_term}")
+        print(f"DEBUG EVAL - Eval Type: {selected_eval}")
+        
         if selected_term and selected_eval:
-            # تكوين اسم الملف ليصبح مثلاً: term1_eval1.pdf
             filename = f"{selected_term}_{selected_eval}.pdf"
+            print(f"DEBUG EVAL - Target filename: {filename}")
             
-            # مسار البحث: static -> exams_timeline -> evaluations
             static_folder_id = find_subfolder_id_by_name(ROOT_FOLDER_ID, 'static')
             exams_main_id = find_subfolder_id_by_name(static_folder_id, 'exams_timeline') if static_folder_id else None
             eval_folder_id = find_subfolder_id_by_name(exams_main_id, 'evaluations') if exams_main_id else None
+            print(f"DEBUG EVAL - eval_folder_id: {eval_folder_id}")
             
             if eval_folder_id:
                 file_id = search_file_in_drive(eval_folder_id, filename)
-            
+                print(f"DEBUG EVAL - Found file_id: {file_id}")
+                
             if not file_id:
                 error_message = "عذراً، هذا التقييم غير متاح حالياً."
         else:
@@ -157,7 +161,7 @@ def evaluations_page():
                            file_id=file_id, 
                            error_message=error_message, 
                            selected_term=selected_term, 
-                           selected_type=selected_eval) # تمريرها بالاسم المطابق للـ HTML
+                           selected_type=selected_eval)
 
 @app.route("/exams_timeline/finals", methods=["GET", "POST"])
 def finals_page():
